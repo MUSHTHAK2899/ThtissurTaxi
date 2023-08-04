@@ -6,7 +6,7 @@ import { FONTS } from '../Constants/Constants';
 const Hedder = ({name,navigation}) => {
   return (
     <View style={{backgroundColor:'#FFBF00',height:55,elevation:10,flexDirection:'row',alignItems:'center'}}>
-       <TouchableOpacity style={{flexDirection:'row',alignItems:'center',marginHorizontal:7}}  onPress={() => navigation.goBack()}>
+       <TouchableOpacity style={{flexDirection:'row',alignItems:'center',marginHorizontal:7}}  onPress={() => {navigation.goBack()}}>
        <MaterialCommunityIcons
         name={'chevron-left'}
         color={'white'}

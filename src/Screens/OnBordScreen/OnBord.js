@@ -12,6 +12,7 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import Display from '../../utils/Display';
 import {FONTS} from '../../Constants/Constants';
 import MaterialCommunityIcons from 'react-native-vector-icons/EvilIcons';
+import OnBrod from '../../Assets/OnBordSvg.svg'
 
 const OnBord = ({navigation}) => {
   return (
@@ -27,11 +28,16 @@ const OnBord = ({navigation}) => {
           style={{
             width: '90%',
             alignSelf: 'center',
-            marginTop: Display.setHeight(15),
+            // marginTop: Display.setHeight(5),
+            flex:1,
+            flexDirection:'column',
+            justifyContent:'center',
+            alignItems:'center'
           }}>
           <Image
-            style={{width: Display.setWidth(90), height: Display.setHeight(34)}}
-            source={require('../../Assets/OnBord.jpg')}
+          resizeMode='contain'
+            style={{width: Display.setWidth(90), height: Display.setHeight(40)}}
+            source={require('../../Assets/OnBordTaxi.png')}
           />
           <Text
             style={{
@@ -41,7 +47,7 @@ const OnBord = ({navigation}) => {
               width: Display.setWidth(80),
               alignSelf: 'center',
               textAlign: 'center',
-              marginTop: Display.setHeight(4),
+              // marginTop: Display.setHeight(4),
             }}>
             Enjoy the freedom with environment awareness
           </Text>
