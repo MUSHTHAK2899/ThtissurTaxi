@@ -43,7 +43,7 @@ const ResetPassword = ({navigation}) => {
         password_confirmation: conformPassword
       }).catch(err => {
         setLoading(false);
-        console.log(err);
+        // console.log(err);
         toast.show( `${err?.message}`,{
           type:'danger',
         });
@@ -51,14 +51,14 @@ const ResetPassword = ({navigation}) => {
       if (res.data && res.data.status == 200) {
         setLoading(false);
         navigation.navigate('Account')
-        console.log('login res', res?.data);
+        // console.log('login res', res?.data);
         toast.show( `${res.data?.message}`,{
           type:'success',
         });
         
       } else {
         setLoading(false);
-        console.log('login res 2', res.data);
+        // console.log('login res 2', res.data);
         toast.show( `${res.data?.message}`,{
           type:'warning',
         });

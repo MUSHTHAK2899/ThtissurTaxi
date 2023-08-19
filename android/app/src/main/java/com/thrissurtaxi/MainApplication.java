@@ -1,4 +1,4 @@
-package com.thrissurtaxi;
+package com.quarous.taxi;
 
 import android.app.Application;
 import com.facebook.react.PackageList;

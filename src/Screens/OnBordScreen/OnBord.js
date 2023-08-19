@@ -49,27 +49,27 @@ const OnBord = ({navigation}) => {
               textAlign: 'center',
               // marginTop: Display.setHeight(4),
             }}>
-            Enjoy the freedom with environment awareness
+         Taxi, Driven By Passion 
           </Text>
           <Text
             style={{
               fontFamily: FONTS.FontRobotoRegular,
               fontSize: 14,
               color: '#BABABA',
-              width: Display.setWidth(60),
+              width: Display.setWidth(80),
               alignSelf: 'center',
               textAlign: 'center',
-              marginTop: Display.setHeight(4),
+              marginTop: Display.setHeight(2),
             }}>
-            Quick choose your vehicle,Book it and enjoy the freedom
+          Keep track of the details of your trip
           </Text>
           <TouchableOpacity
             onPress={() => navigation.navigate('Login')}
             style={{
               backgroundColor: 'black',
-              width: Display.setWidth(50),
+              width: Display.setWidth(57),
               alignSelf: 'center',
-              marginTop: Display.setHeight(4),
+              marginTop: Display.setHeight(8),
               flexDirection: 'row',
               justifyContent: 'center',
               alignItems: 'center',
@@ -83,7 +83,7 @@ const OnBord = ({navigation}) => {
                 fontSize: 15,
                 flexDirection: 'row',
               }}>
-              Find Partner
+             Let's Start Driving
             </Text>
             <View style={{marginLeft: 15}}>
               <MaterialCommunityIcons

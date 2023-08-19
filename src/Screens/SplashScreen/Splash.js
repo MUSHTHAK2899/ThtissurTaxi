@@ -23,7 +23,7 @@ const Splash = ({navigation}) => {
     const accessToken = await AsyncStorage.getItem('userAccessToken');
     var accessuser = await AsyncStorage.getItem('userDetails');
     const acyncType = JSON.parse(accessuser);
-    console.log("verify_status",acyncType);
+    // console.log("verify_status",acyncType);
     if (accessToken !== null && acyncType?.verify_status == 1) {
       setTimeout(() => navigation.navigate('Home'), 2000);
     } else {

@@ -40,6 +40,7 @@ const AddDriverModal = props => {
     ModalTitle,
     ModalButtonText,
     AdminUpdateDriver,
+    loading
   } = props;
 
   return (
@@ -110,7 +111,7 @@ const AddDriverModal = props => {
           <View style={{marginTop: 19}}>
             <DropDownPicker
               open={open}
-              placeholder=" Select Email Verify Status"
+              placeholder="Select email verification status"
               value={value}
               items={items}
               setOpen={setOpen}
@@ -130,6 +131,7 @@ const AddDriverModal = props => {
             />
           </View>
           <TouchableOpacity
+          disabled={loading}
             onPress={ModalButtonText =='Add Driver'? HandleAddUser : AdminUpdateDriver}
             style={[styles.buttonView, {backgroundColor: '#28a745'}]}>
             <Text style={styles.buttonText}>{ModalButtonText}</Text>

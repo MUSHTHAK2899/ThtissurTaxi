@@ -18,7 +18,7 @@ import {DriveLIst} from '../../Componets/DummyData';
 import {FONTS} from '../../Constants/Constants';
 import Api from '../../Api/GeneralApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useToast } from "react-native-toast-notifications";
+import {useToast} from 'react-native-toast-notifications';
 import LoadingMoadal from '../../Componets/LoadingMoadal';
 import Display from '../../utils/Display';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -30,7 +30,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Image} from 'react-native-elements';
-import { useIsFocused} from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 import AddDriverModal from '../../Componets/AddDriverModal';
 
 const Drivers = ({navigation}) => {
@@ -54,7 +54,7 @@ const Drivers = ({navigation}) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([
-    {label: 'Vrified', value: 1},
+    {label: 'verified', value: 1},
     {label: 'Not Verified', value: 0},
   ]);
   const [open1, setOpen1] = useState(false);
@@ -76,15 +76,15 @@ const Drivers = ({navigation}) => {
     setIsLoading(true);
     const res = await Api.GetDrivers(1).catch(err => {
       setIsLoading(false);
-      console.log(err);
+      // console.log(err);
     });
     if (res.data && res.data.status == 200) {
       setIsLoading(false);
-      console.log('GetDrivers res', res);
+      // console.log('GetDrivers res', res);
       setDriversList(res?.data?.data?.drivers);
       setTotalPages(res?.data?.data?.meta?.total_pages);
     } else {
-      console.log('GetDrivers res 2', res);
+      // console.log('GetDrivers res 2', res);
       setIsLoading(false);
     }
   };
@@ -93,24 +93,24 @@ const Drivers = ({navigation}) => {
     setIsLoading(true);
     const res = await Api.GetDrivers(currentPage).catch(err => {
       setIsLoading(false);
-      console.log(err);
+      // console.log(err);
     });
     if (res.data && res.data.status == 200) {
       setIsLoading(false);
-      console.log('GetDrivers res', res);
+      // console.log('GetDrivers res', res);
       setDriversList(prevData => [...prevData, ...res?.data?.data?.drivers]);
       setTotalPages(res?.data?.data?.meta?.total_pages);
     } else {
-      console.log('GetDrivers res 2', res);
+      // console.log('GetDrivers res 2', res);
       setIsLoading(false);
     }
   };
 
   const onEndReachedEnd = () => {
-    console.log('curent', currentPage);
+    // console.log('curent', currentPage);
     if (!isLoading) {
       if (currentPage == totalPages) {
-        console.log('pages is equal reached');
+        // console.log('pages is equal reached');
       } else {
         setCurrentPage(prevPage => prevPage + 1);
       }
@@ -128,13 +128,13 @@ const Drivers = ({navigation}) => {
     setLoading(true);
     const res = await Api.GetDriverCode().catch(err => {
       setLoading(false);
-      console.log('HandleDriverCode', err);
+      // console.log('HandleDriverCode', err);
     });
     if (res.data) {
       setLoading(false);
       setIsModalVisible(true);
       setAdminDriverData(res?.data?.data);
-      console.log('HandleDriverCode', res.data.data);
+      // console.log('HandleDriverCode', res.data.data);
     }
   };
 
@@ -142,7 +142,7 @@ const Drivers = ({navigation}) => {
     var accessuser = await AsyncStorage.getItem('userDetails');
     const acyncType = JSON.parse(accessuser);
     setUserLoginData(acyncType);
-    console.log(acyncType);
+    // console.log(acyncType);
   };
 
   useEffect(() => {
@@ -170,17 +170,17 @@ const Drivers = ({navigation}) => {
 
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
-          console.log(
-            `Shared successfully to activity: ${result.activityType}`,
-          );
+          // console.log(
+          //   `Shared successfully to activity: ${result.activityType}`,
+          // );
         } else {
-          console.log('Shared successfully!');
+          // console.log('Shared successfully!');
         }
       } else if (result.action === Share.dismissedAction) {
-        console.log('Share dismissed!');
+        // console.log('Share dismissed!');
       }
     } catch (error) {
-      console.error('Error sharing:', error.message);
+      // console.error('Error sharing:', error.message);
     }
   };
 
@@ -206,78 +206,65 @@ const Drivers = ({navigation}) => {
   };
 
   const handleDeleteApi = async id => {
-    toast.hideAll()
+    toast.hideAll();
     setLoading(true);
     const res = await Api.DeleteDriver({driver_id: id}).catch(err => {
       setLoading(false);
-      console.log(err);
-      toast.show( `${err?.message}`,{
-        type:'danger',
+      // console.log(err);
+      toast.show(`${err?.message}`, {
+        type: 'danger',
       });
     });
     if (res.data && res.data.status == 200) {
       setLoading(false);
       const newDataArray = DriversList.filter(item => item?.driver_id !== id);
       setDriversList(newDataArray);
-      console.log('AdminDeleteTrip res', res);
-      toast.show( `${res.data?.message}`,{
-        type:'success',
+      // console.log('AdminDeleteTrip res', res);
+      toast.show(`${res.data?.message}`, {
+        type: 'success',
       });
     } else {
       setLoading(false);
-      console.log('AdminDeleteTrip res 2', res);
-      toast.show( `${res.data?.message}`,{
-        type:'warning',
+      // console.log('AdminDeleteTrip res 2', res);
+      toast.show(`${res.data?.message}`, {
+        type: 'warning',
       });
     }
   };
 
   const HandleAddUser = async () => {
+    toast.hideAll();
     setLoading(true);
-    if (
-      !email ||
-      !AddDriverName ||
-      !mobileNumber ||
-      !password ||
-      value == null ||
-      value1 == null
-    ) {
+    const res = await Api.AddDriver({
+      name: AddDriverName,
+      email: email,
+      mobile_number: mobileNumber,
+      password: password,
+      verify_status: value,
+      account_status: value1,
+    }).catch(err => {
       setLoading(false);
-      toast.show(  'The fields are required',{
-        type:'danger',
+      // console.log(err);
+      toast.show(`${err?.message}`, {
+        type: 'danger',
+      });
+    });
+    if (res.data && res.data.status == 200) {
+      setDriversList([]);
+      GetDriversFirst();
+      setCurrentPage(1);
+      setIsModalVisibleDriver(false);
+      setLoading(false);
+      // console.log('AddDriver res', res?.data);
+      toast.show(`${res.data?.message}`, {
+        type: 'success',
       });
     } else {
-      const res = await Api.AddDriver({
-        name: AddDriverName,
-        email: email,
-        mobile_number: mobileNumber,
-        password: password,
-        verify_status: value,
-        account_status: value1,
-      }).catch(err => {
-        setLoading(false);
-        console.log(err);
-        toast.show( `${err?.message}`,{
-          type:'danger',
-        });
+      setLoading(false);
+      // console.log('AddDriver res 2', res.data);
+      toast.show(`${res.data?.message}`, {
+        type: 'warning',
       });
-      if (res.data && res.data.status == 200) {
-        setDriversList([]);
-        GetDriversFirst();
-        setCurrentPage(1);
-        setIsModalVisibleDriver(false);
-        setLoading(false);
-        console.log('AddDriver res', res?.data);
-        toast.show( `${res.data?.message}`,{
-          type:'success',
-        });
-      } else {
-        setLoading(false);
-        console.log('AddDriver res 2', res.data);
-        toast.show( `${res.data?.message}`,{
-          type:'warning',
-        });
-      }
     }
   };
 
@@ -298,6 +285,7 @@ const Drivers = ({navigation}) => {
     setValue();
     setValue1();
     setAddDriverName('');
+    setPassword('')
     setEmail('');
     setMobileNumber('');
     setIsModalVisibleDriver(true);
@@ -306,7 +294,7 @@ const Drivers = ({navigation}) => {
   };
 
   const AdminUpdateDriver = async () => {
-    toast.hideAll()
+    toast.hideAll();
     setLoading(true);
     const res = await Api.AdminUpdateDriver({
       driver_id: DriverId,
@@ -318,32 +306,48 @@ const Drivers = ({navigation}) => {
       account_status: value1,
     }).catch(err => {
       setLoading(false);
-      console.log(err);
-      toast.show( `${err?.message}`,{
-        type:'danger',
+      // console.log(err);
+      toast.show(`${err?.message}`, {
+        type: 'danger',
       });
     });
     if (res.data && res.data.status == 200) {
       setDriversList([]);
       GetDriversFirst();
       setCurrentPage(1);
+      // const NewDriversList =DriversList.map((item)=>{
+      //   if(item?.driver_id == DriverId){
+      //     return{
+      //       ...item,
+      //       driver_id: DriverId,
+      //       name: AddDriverName,
+      //       email: email,
+      //       mobile_number: mobileNumber,
+      //       password: password,
+      //       verify_status: value,
+      //       account_status: value1,
+      //     }
+      //   }
+      //    return item
+      // })
+      //  setDriversList(NewDriversList)
       setIsModalVisibleDriver(false);
       setLoading(false);
-      console.log('AdminUpdateDriver res', res);
-      toast.show( `${res.data?.message}`,{
-        type:'success',
+      // console.log('AdminUpdateDriver res', res);
+      toast.show(`${res.data?.message}`, {
+        type: 'success',
       });
     } else {
       setLoading(false);
-      console.log('AdminUpdateDriver res 2', res);
-      toast.show( `${res.data?.message}`,{
-        type:'warning',
+      // console.log('AdminUpdateDriver res 2', res);
+      toast.show(`${res.data?.message}`, {
+        type: 'warning',
       });
     }
   };
 
   const OnDriversList = ({item}) => {
-    console.log('OnDriversList', item);
+    // console.log('OnDriversList', item);
     return (
       <>
         <View>

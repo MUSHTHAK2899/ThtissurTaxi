@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.thrissurtaxi",
+  "applicationId": "com.quarous.taxi",
   "variantName": "release",
   "elements": [
     {

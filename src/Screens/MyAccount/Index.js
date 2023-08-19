@@ -6,7 +6,7 @@ import {
   StatusBar,
   Alert,
   TouchableOpacity,
-  Image
+  Image,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
@@ -19,8 +19,7 @@ import Display from '../../utils/Display';
 import Api from '../../Api/GeneralApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoadingMoadal from '../../Componets/LoadingMoadal';
-import { useToast } from "react-native-toast-notifications";
-
+import {useToast} from 'react-native-toast-notifications';
 
 const Account = ({navigation}) => {
   const toast = useToast();
@@ -30,7 +29,7 @@ const Account = ({navigation}) => {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [userLoginData, setUserLoginData] = useState({});
- 
+
   useEffect(() => {
     setEmail(userLoginData?.email);
     setPhone(userLoginData?.mobile_number);
@@ -38,7 +37,7 @@ const Account = ({navigation}) => {
   }, [userLoginData]);
 
   const HandleImage = () => {
-    toast.hideAll()
+    toast.hideAll();
     ImagePicker.openPicker({
       width: 300,
       height: 400,
@@ -61,28 +60,28 @@ const Account = ({navigation}) => {
 
       const res = await Api.UpdateProfilePic(data).catch(err => {
         console.log('api error response', err);
-        toast.show( `${err?.response?.data?.message}`,{
-          type:'danger',
+        toast.show(`${err?.response?.data?.message}`, {
+          type: 'danger',
         });
       });
       if (res.data && res.data.status) {
         setUserLoginData(res?.data?.data?.user_data);
-        console.log(
-          'response ProfileEdit  ======> ',
-          res?.data?.data?.user_data,
-        );
+        // console.log(
+        //   'response ProfileEdit  ======> ',
+        //   res?.data?.data?.user_data,
+        // );
         AsyncStorage.setItem(
           'userDetails',
           JSON.stringify(res?.data?.data?.user_data),
         );
-        toast.show( `${res.data?.message}`,{
-          type:'success',
+        toast.show(`${res.data?.message}`, {
+          type: 'success',
         });
       }
     });
   };
 
-  const HandleLogoutAccount= (id) => {
+  const HandleLogoutAccount = id => {
     Alert.alert(
       'Confirmation',
       'Are you sure you want to Logout this Account?',
@@ -95,7 +94,7 @@ const Account = ({navigation}) => {
           text: 'LogOut',
           style: 'destructive',
           onPress: () => {
-            HandleLogOut()
+            HandleLogOut();
           },
         },
       ],
@@ -104,24 +103,24 @@ const Account = ({navigation}) => {
   };
 
   const HandleLogOut = async () => {
-    toast.hideAll()
+    toast.hideAll();
     setLoading(true);
     const res = await Api.Logout({}).catch(err => {
       setLoading(false);
-      console.log(err);
+      // console.log(err);
     });
     if (res.data) {
       setLoading(false);
-      console.log(res.data?.data);
+      // console.log(res.data?.data);
       AsyncStorage.clear();
       AsyncStorage.removeItem('userDetails');
-      console.log('logout', res.data);
+      // console.log('logout', res.data);
       navigation.reset({
         index: 0,
         routes: [{name: 'Login'}],
       });
-      toast.show( `${res.data?.message}`,{
-        type:'success',
+      toast.show(`${res.data?.message}`, {
+        type: 'success',
       });
     }
   };
@@ -130,7 +129,7 @@ const Account = ({navigation}) => {
     var accessuser = await AsyncStorage.getItem('userDetails');
     const acyncType = JSON.parse(accessuser);
     setUserLoginData(acyncType);
-    console.log(acyncType);
+    // console.log(acyncType);
   };
 
   useEffect(() => {
@@ -140,37 +139,35 @@ const Account = ({navigation}) => {
     return unsubscribe;
   }, [navigation]);
 
-
-
   const HandleProfileUpdate = async () => {
-    toast.hideAll()
+    toast.hideAll();
     setLoading(true);
     const res = await Api.UpdateProfile({
       name: name,
       mobile_number: phone,
     }).catch(err => {
       setLoading(false);
-      console.log(err);
-      toast.show( `${err?.message}`,{
-        type:'danger',
+      // console.log(err);
+      toast.show(`${err?.message}`, {
+        type: 'danger',
       });
     });
     if (res.data && res.data.status == 200) {
       setLoading(false);
-      console.log('login res', res?.data?.data?.user_data);
+      // console.log('login res', res?.data?.data?.user_data);
       setUserLoginData(res?.data?.data?.user_data);
       AsyncStorage.setItem(
         'userDetails',
         JSON.stringify(res?.data?.data?.user_data),
       );
-      toast.show( `${res.data?.message}`,{
-        type:'success',
+      toast.show(`${res.data?.message}`, {
+        type: 'success',
       });
     } else {
       setLoading(false);
-      console.log('login res 2', res.data);
-      toast.show( `${res.data?.message}`,{
-        type:'warning',
+      // console.log('login res 2', res.data);
+      toast.show(`${res.data?.message}`, {
+        type: 'warning',
       });
     }
   };
@@ -185,20 +182,30 @@ const Account = ({navigation}) => {
         />
         <Hedder name={'MY Account'} navigation={navigation} />
         <View style={{flex: 1, backgroundColor: '#fefce8'}}>
+          <View
+            style={{
+              flexDirection: 'row-reverse',
+              justifyContent: 'space-between',
+              padding: 20,
+              alignItems: 'center',
+            }}>
             <TouchableOpacity
-            onPress={HandleLogoutAccount}
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-                marginHorizontal: 30,
-                marginTop: 15,
-              }}>
+              onPress={HandleLogoutAccount}
+              style={
+                {
+                  // flexDirection: 'row',
+                  // justifyContent: 'flex-end',
+                  // marginHorizontal: 30,
+                  // marginTop: 15,
+                }
+              }>
               <MaterialCommunityIcons
-                name={'remove-user'}
+                name={'log-out'}
                 color={'black'}
                 size={25}
               />
             </TouchableOpacity>
+          </View>
           <View style={styles.imageHedder}>
             <TouchableOpacity
               onPress={HandleImage}
@@ -265,8 +272,7 @@ const Account = ({navigation}) => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.buttonView, {backgroundColor: '#134e4a'}]}
-                onPress={() => navigation.navigate('ResetPassword')}
-                >
+                onPress={() => navigation.navigate('ResetPassword')}>
                 <Text style={styles.buttonText}>Reset Password</Text>
               </TouchableOpacity>
             </View>
@@ -292,7 +298,7 @@ const styles = StyleSheet.create({
   },
   imageHedder: {
     alignItems: 'center',
-    marginTop: 25,
+    // marginTop: 25,
   },
   image: {
     width: 105,
@@ -327,5 +333,4 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: FONTS.FontRobotoRegular,
   },
-
 });

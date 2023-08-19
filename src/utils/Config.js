@@ -24,7 +24,7 @@ export const multiPartAxios = axios1.create({
 
 axios.interceptors.request.use(async function (_config) {
   var accessToken = await AsyncStorage.getItem('userAccessToken');
-  console.log('tokenssssss', accessToken);
+  // console.log('tokenssssss', accessToken);
   if (accessToken !== null) {
     _config.headers.Authorization = 'Bearer ' + accessToken;
   }

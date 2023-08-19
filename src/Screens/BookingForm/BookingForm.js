@@ -11,7 +11,7 @@ import {
   Button,
   BackHandler,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import Display from '../../utils/Display';
 import {FONTS} from '../../Constants/Constants';
@@ -22,10 +22,11 @@ import DropDown from '../../Componets/DropDwon';
 import {format} from 'date-fns';
 import Api from '../../Api/GeneralApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useToast } from "react-native-toast-notifications";
+import {useToast} from 'react-native-toast-notifications';
 import LoadingMoadal from '../../Componets/LoadingMoadal';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Drive from '../Drive/Drive';
+import SignatureCapture from 'react-native-signature-capture';
+import Modal from 'react-native-modal';
 
 const BookingForm = ({navigation}) => {
   const toast = useToast();
@@ -38,15 +39,18 @@ const BookingForm = ({navigation}) => {
   const [PickUp, setPickUp] = useState('');
   const [Drop, setDrop] = useState('');
   const [VisitPlace, setVisitPlace] = useState('');
-  const [StartingKMGarage, setStartingKMGarage] = useState(0);
-  const [EndKMGarage, setEndKMGarage] = useState(0);
-  const [StartingKMPickupPoint, setStartingKMPickupPoint] = useState(0);
-  const [EndingKMPickupPoint, setEndingKMPickupPoint] = useState(0);
-  const [NumberofDays, setNumberofDays] = useState(0);
-  const [NumberofNight, setNumberofNight] = useState(0);
-  const [PerimitTollParkingAmount, setPerimitTollParkingAmount] = useState(0);
-  const [DieselAmount, setDieselAmount] = useState(0);
-  const [DieselKm, setDieselKm] = useState(0);
+  const [StartingKMGarage, setStartingKMGarage] = useState();
+  const [EndKMGarage, setEndKMGarage] = useState('');
+  const [StartingKMPickupPoint, setStartingKMPickupPoint] = useState('');
+  const [EndingKMPickupPoint, setEndingKMPickupPoint] = useState('');
+  const [NumberofDays, setNumberofDays] = useState('');
+  const [NumberofNight, setNumberofNight] = useState('');
+  const [PerimitTollParkingAmount, setPerimitTollParkingAmount] = useState('');
+  const [DieselAmount, setDieselAmount] = useState('');
+  const [DieselKm, setDieselKm] = useState('');
+  const [otherExpenseName, setOtherExpenseName] = useState('');
+  const [otherExpenseAmount, setOtherExpenseAmount] = useState('');
+
   // start garage time
   const [startGrageDate, setstartGrageDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
@@ -70,6 +74,7 @@ const BookingForm = ({navigation}) => {
   //api----
   const [TripData, setTripData] = useState({});
   const [loading, setLoading] = useState(false);
+  const [signaturePadShow, SetSignaturePadShow] = useState(false);
 
   //bottomTabPress
   const [ButtonShowSatus, setButtonShowStatus] = useState();
@@ -165,17 +170,21 @@ const BookingForm = ({navigation}) => {
   }, [TripData]);
 
   const GrageStartTime = format(startGrageDate, 'yyyy-MM-dd').concat(
-          ' ', format(startGrageTime, 'HH:mm:ss'),
-        );
-  const GarageEndTime =format(endGrageDate, 'yyyy-MM-dd').concat(
-          ' ',format(endGrageTime, 'HH:mm:ss'),
-        );
-  const PickUpStartTime =format(startDatePickupPoint, 'yyyy-MM-dd').concat(
-          ' ', format(startTimePickupPoint, 'HH:mm:ss'),
-        );
+    ' ',
+    format(startGrageTime, 'HH:mm:ss'),
+  );
+  const GarageEndTime = format(endGrageDate, 'yyyy-MM-dd').concat(
+    ' ',
+    format(endGrageTime, 'HH:mm:ss'),
+  );
+  const PickUpStartTime = format(startDatePickupPoint, 'yyyy-MM-dd').concat(
+    ' ',
+    format(startTimePickupPoint, 'HH:mm:ss'),
+  );
   const DropEndTime = format(endDateDropPoint, 'yyyy-MM-dd').concat(
-          ' ', format(endTimeDropPoint, 'HH:mm:ss'),
-        );
+    ' ',
+    format(endTimeDropPoint, 'HH:mm:ss'),
+  );
   const Data = {
     trip_id: tripId,
     vehicle_type:
@@ -200,74 +209,77 @@ const BookingForm = ({navigation}) => {
     permit_toll: PerimitTollParkingAmount,
     diesel_amount: DieselAmount,
     diesel_km: DieselKm,
+    other_expense_name: otherExpenseName,
+    other_expense_amount: +otherExpenseAmount,
   };
 
   const HandleEndTrip = async () => {
-    toast.hideAll()
-    if (
-      !VehicleNumber ||
-      !driver_name ||
-      !ClientName ||
-      !CompanyName ||
-      !PickUp ||
-      !VisitPlace ||
-      !Drop ||
-      !StartingKMGarage ||
-      !EndKMGarage ||
-      !StartingKMPickupPoint ||
-      !EndingKMPickupPoint ||
-      !NumberofDays ||
-      !NumberofNight ||
-      !PerimitTollParkingAmount ||
-      !DieselAmount ||
-      !DieselKm
-    ) {
-      toast.show("some mandatory fields are missing",{
-        type:'danger',
+    toast.hideAll();
+    setLoading(true);
+    const res = await Api.EndTrip(Data).catch(err => {
+      setLoading(false);
+      // console.log(err);
+      toast.show(`${err?.message}`, {
+        type: 'danger',
+      });
+    });
+    if (res.data && res.data.status == 200) {
+      setstartGrageDate(new Date());
+      setstartGrageTime(new Date());
+      setEndGrageDate(new Date());
+      setEndGrageTime(new Date());
+      SetStartDatePickupPoint(new Date());
+      SetStartTimePickupPoint(new Date());
+      setEndDateDropPoint(new Date());
+      setEndTimeDropPoint(new Date());
+      setVehicleNumber('');
+      setCompanyName('');
+      setClientName('');
+      setStartingKMGarage();
+      setEndKMGarage('');
+      setPickUp('');
+      setChecked('');
+      setDrop('');
+      setVisitPlace('');
+      setStartingKMPickupPoint('');
+      setEndingKMPickupPoint('');
+      setNumberofDays('');
+      setNumberofNight('');
+      setPerimitTollParkingAmount('');
+      setDieselAmount('');
+      setDieselKm('');
+      setLoading(false);
+      // console.log('UpdateTrip res', res);
+      setTripData(res.data?.data?.trip_data);
+      setButtonShowStatus(res.data?.data?.show_start_trip_button);
+      AsyncStorage.setItem(
+        'TripDetails',
+        JSON.stringify(res.data?.data?.trip_data),
+      );
+      AsyncStorage.setItem(
+        'TripSatus',
+        JSON.stringify(res.data?.data?.show_start_trip_button),
+      );
+      toast.show(`${res.data?.message}`, {
+        type: 'success',
       });
     } else {
-      setLoading(true);
-      const res = await Api.EndTrip(Data).catch(err => {
-        setLoading(false);
-        console.log(err);
-        toast.show( `${err?.message}`,{
-          type:'danger',
-        });
+      setLoading(false);
+      // console.log('UpdateTrip res 2', res);
+      toast.show(`${res.data?.message}`, {
+        type: 'warning',
       });
-      if (res.data && res.data.status == 200) {
-        setLoading(false);
-        console.log('UpdateTrip res', res);
-        setTripData(res.data?.data?.trip_data);
-        setButtonShowStatus(res.data?.data?.show_start_trip_button);
-        AsyncStorage.setItem(
-          'TripDetails',
-          JSON.stringify(res.data?.data?.trip_data),
-        );
-        AsyncStorage.setItem(
-          'TripSatus',
-          JSON.stringify(res.data?.data?.show_start_trip_button),
-        );
-        toast.show( `${res.data?.message}`,{
-          type:'success',
-        });
-      } else {
-        setLoading(false);
-        console.log('UpdateTrip res 2', res);
-        toast.show( `${res.data?.message}`,{
-          type:'warning',
-        });
-      }
     }
   };
 
   const HandleUpdateTrip = async () => {
-    toast.hideAll()
+    toast.hideAll();
     setLoading(true);
     const res = await Api.UpdateTrip(Data).catch(err => {
       setLoading(false);
-      console.log(err);
-      toast.show( `${err?.message}`,{
-        type:'danger',
+      // console.log(err);
+      toast.show(`${err?.message}`, {
+        type: 'danger',
       });
     });
     if (res.data && res.data.status == 200) {
@@ -283,33 +295,57 @@ const BookingForm = ({navigation}) => {
         'TripSatus',
         JSON.stringify(res.data?.data?.show_start_trip_button),
       );
-      toast.show( `${res.data?.message}`,{
-        type:'success',
+      toast.show(`${res.data?.message}`, {
+        type: 'success',
       });
     } else {
       setLoading(false);
       console.log('UpdateTrip res 2', res);
-      toast.show( `${res.data?.message}`,{
-        type:'warning',
+      toast.show(`${res.data?.message}`, {
+        type: 'warning',
       });
     }
   };
 
   const HandleCancelTrip = async () => {
-    toast.hideAll()
+    toast.hideAll();
     setLoading(true);
     const res = await Api.CancelTrip({
       trip_id: TripData?.trip_id,
     }).catch(err => {
       setLoading(false);
-      console.log(err);
-      toast.show( `${err?.message}`,{
-        type:'danger',
+      // console.log(err);
+      toast.show(`${err?.message}`, {
+        type: 'danger',
       });
     });
     if (res.data && res.data.status == 200) {
+      setstartGrageDate(new Date());
+      setstartGrageTime(new Date());
+      setEndGrageDate(new Date());
+      setEndGrageTime(new Date());
+      SetStartDatePickupPoint(new Date());
+      SetStartTimePickupPoint(new Date());
+      setEndDateDropPoint(new Date());
+      setEndTimeDropPoint(new Date());
+      setVehicleNumber('');
+      setCompanyName('');
+      setClientName('');
+      setStartingKMGarage();
+      setEndKMGarage('');
+      setPickUp('');
+      setChecked('');
+      setDrop('');
+      setVisitPlace('');
+      setStartingKMPickupPoint('');
+      setEndingKMPickupPoint('');
+      setNumberofDays('');
+      setNumberofNight('');
+      setPerimitTollParkingAmount('');
+      setDieselAmount('');
+      setDieselKm('');
       setLoading(false);
-      console.log('HandleCancelTrip res', res);
+      // console.log('HandleCancelTrip res', res);
       AsyncStorage.setItem(
         'TripDetails',
         JSON.stringify(res.data?.data?.trip_data),
@@ -321,14 +357,14 @@ const BookingForm = ({navigation}) => {
         JSON.stringify(res.data?.data?.show_start_trip_button),
       );
       // navigation.navigate('Home');
-      toast.show( `${res.data?.message}`,{
-        type:'success',
+      toast.show(`${res.data?.message}`, {
+        type: 'success',
       });
     } else {
       setLoading(false);
-      console.log('HandleCancelTrip res 2', res);
-      toast.show( `${res.data?.message}`,{
-        type:'warning',
+      // console.log('HandleCancelTrip res 2', res);
+      toast.show(`${res.data?.message}`, {
+        type: 'warning',
       });
     }
   };
@@ -338,12 +374,12 @@ const BookingForm = ({navigation}) => {
     await Api.GetDriveDetails()
       .catch(err => {
         setLoading(false);
-        console.log('HandleDriverCode', err);
+        // console.log('HandleDriverCode', err);
       })
       .then(res => {
-        setLoading(false)
+        setLoading(false);
         setButtonShowStatus(res.data?.data?.show_start_trip_button);
-        console.log('res GetDriveDetails', res.data?.data);
+        // console.log('res GetDriveDetails', res.data?.data);
         AsyncStorage.setItem(
           'TripDetails',
           JSON.stringify(res.data?.data?.trip_data),
@@ -367,32 +403,79 @@ const BookingForm = ({navigation}) => {
   }, [navigation]);
 
   const HandleStartTrip = async () => {
-    toast.hideAll()
+    toast.hideAll();
     setLoading(true);
     const res = await Api.StartTrip({}).catch(err => {
       setLoading(false);
-      console.log(err);
-      toast.show( `${err?.message}`,{
-        type:'danger',
+      // console.log(err);
+      toast.show(`${err?.message}`, {
+        type: 'danger',
       });
     });
     if (res.data && res.data.status == 200) {
       setButtonShowStatus(res.data?.data?.show_start_trip_button);
       setLoading(false);
-      console.log('login res', res);
+      // console.log('login res', res);
       AsyncStorage.setItem(
         'TripDetails',
         JSON.stringify(res.data?.data?.trip_data),
       );
       setTripData(res.data?.data?.trip_data);
-      toast.show( `${res.data?.message}`,{
-        type:'success',
+      toast.show(`${res.data?.message}`, {
+        type: 'success',
       });
     } else {
       setLoading(false);
-      console.log('login res 2', res.data);
-      toast.show( `${res.data?.message}`,{
-        type:'warning',
+      // console.log('login res 2', res.data);
+      toast.show(`${res.data?.message}`, {
+        type: 'warning',
+      });
+    }
+  };
+
+  const signatureRef = useRef(null);
+
+  const handleSave = () => {
+    console.log("hai")
+    if (signatureRef.current) {
+      signatureRef.current.saveImage();
+    }
+  };
+
+  const handleReset = () => {
+    if (signatureRef.current) {
+      signatureRef.current.resetImage();
+    }
+  };
+
+  const handleSaveEvent =async ( result) => {
+    // Handle the signature data from result.encoded
+    console.log('Signature saved:', result.encoded);
+    SetSignaturePadShow(false);
+    toast.hideAll();
+    setLoading(true);
+    const res = await Api.UpdateCustomerSignature({
+      trip_id: TripData?.trip_id,
+      signature:String(result.encoded)
+    }).catch(err => {
+      setLoading(false);
+      // console.log(err);
+      toast.show(`${err?.message}`, {
+        type: 'danger',
+      });
+    });
+    if (res.data && res.data.status == 200) {
+      setLoading(false);
+      console.log('UpdateCustomerSignature res',res );
+      // navigation.navigate('Home');
+      toast.show(`${res.data?.message}`, {
+        type: 'success',
+      });
+    } else {
+      setLoading(false);
+      console.log('UpdateCustomerSignature res 2', res);
+      toast.show(`${res.data?.message}`, {
+        type: 'warning',
       });
     }
   };
@@ -531,7 +614,7 @@ const BookingForm = ({navigation}) => {
                     keyboardType="ascii-capable"
                   />
                   <DropDown
-                   color={'#fefce8'}
+                    color={'#fefce8'}
                     value={
                       startGrageDate ? format(startGrageDate, 'dd/MM/yy') : ''
                     }
@@ -548,7 +631,7 @@ const BookingForm = ({navigation}) => {
                     />
                   )}
                   <DropDown
-                  color={'#fefce8'}
+                    color={'#fefce8'}
                     value={
                       startGrageTime
                         ? startGrageTime.toLocaleTimeString([], {
@@ -581,7 +664,7 @@ const BookingForm = ({navigation}) => {
                     keyboardType="number-pad"
                   />
                   <DropDown
-                  color={'#fefce8'}
+                    color={'#fefce8'}
                     value={
                       startDatePickupPoint
                         ? format(startDatePickupPoint, 'dd/MM/yy')
@@ -600,7 +683,7 @@ const BookingForm = ({navigation}) => {
                     />
                   )}
                   <DropDown
-                  color={'#fefce8'}
+                    color={'#fefce8'}
                     value={
                       startTimePickupPoint
                         ? startTimePickupPoint.toLocaleTimeString([], {
@@ -641,8 +724,8 @@ const BookingForm = ({navigation}) => {
                     onChangeText={text => setEndingKMPickupPoint(text)}
                     keyboardType="number-pad"
                   />
-                   <DropDown
-                  color={'#fefce8'}
+                  <DropDown
+                    color={'#fefce8'}
                     value={
                       endDateDropPoint
                         ? format(endDateDropPoint, 'dd/MM/yy')
@@ -661,7 +744,7 @@ const BookingForm = ({navigation}) => {
                     />
                   )}
                   <DropDown
-                  color={'#fefce8'}
+                    color={'#fefce8'}
                     value={
                       endTimeDropPoint
                         ? endTimeDropPoint.toLocaleTimeString([], {
@@ -683,7 +766,7 @@ const BookingForm = ({navigation}) => {
                     />
                   )}
                   <DropDown
-                  color={'#fefce8'}
+                    color={'#fefce8'}
                     value={endGrageDate ? format(endGrageDate, 'dd/MM/yy') : ''}
                     label={'End Date Garage'}
                     onPress={() => setShowPickerEndDate(true)}
@@ -698,7 +781,7 @@ const BookingForm = ({navigation}) => {
                     />
                   )}
                   <DropDown
-                  color={'#fefce8'}
+                    color={'#fefce8'}
                     value={
                       endGrageTime
                         ? endGrageTime.toLocaleTimeString([], {
@@ -730,27 +813,26 @@ const BookingForm = ({navigation}) => {
                     keyboardType="number-pad"
                   />
 
-
-                    <TextInput
-                      label="Number of Days"
-                      value={NumberofDays}
-                      style={styles.valueText}
-                      activeOutlineColor={'black'}
-                      mode="outlined"
-                      outlineColor={'black'}
-                      onChangeText={text => setNumberofDays(text)}
-                      keyboardType="number-pad"
-                    />
-                    <TextInput
-                      label="Number Of Nights"
-                      value={NumberofNight}
-                      style={[styles.valueText]}
-                      activeOutlineColor={'black'}
-                      mode="outlined"
-                      outlineColor={'black'}
-                      onChangeText={text => setNumberofNight(text)}
-                      keyboardType="number-pad"
-                    />
+                  <TextInput
+                    label="Number of Days"
+                    value={NumberofDays}
+                    style={styles.valueText}
+                    activeOutlineColor={'black'}
+                    mode="outlined"
+                    outlineColor={'black'}
+                    onChangeText={text => setNumberofDays(text)}
+                    keyboardType="number-pad"
+                  />
+                  <TextInput
+                    label="Number Of Nights"
+                    value={NumberofNight}
+                    style={[styles.valueText]}
+                    activeOutlineColor={'black'}
+                    mode="outlined"
+                    outlineColor={'black'}
+                    onChangeText={text => setNumberofNight(text)}
+                    keyboardType="number-pad"
+                  />
                   <TextInput
                     label="Perimit,Toll & Parking Amount"
                     value={PerimitTollParkingAmount}
@@ -762,28 +844,96 @@ const BookingForm = ({navigation}) => {
                     keyboardType="number-pad"
                   />
                   <View style={{flexDirection: 'row'}}>
-                  <TextInput
-                    label="Diesel Amount"
-                    value={DieselAmount}
-                    style={styles.valueText2}
-                    activeOutlineColor={'black'}
-                    mode="outlined"
-                    outlineColor={'black'}
-                    onChangeText={text => setDieselAmount(text)}
-                    keyboardType="number-pad"
-                  />
-                  <TextInput
-                    label="Diesel Km"
-                    value={DieselKm}
-                    style={[styles.valueText2,{marginLeft:10}]}
-                    activeOutlineColor={'black'}
-                    mode="outlined"
-                    outlineColor={'black'}
-                    onChangeText={text => setDieselKm(text)}
-                    keyboardType="number-pad"
-                  />
+                    <TextInput
+                      label="Diesel Amount"
+                      value={DieselAmount}
+                      style={styles.valueText2}
+                      activeOutlineColor={'black'}
+                      mode="outlined"
+                      outlineColor={'black'}
+                      onChangeText={text => setDieselAmount(text)}
+                      keyboardType="number-pad"
+                    />
+                    <TextInput
+                      label="Diesel Km"
+                      value={DieselKm}
+                      style={[styles.valueText2, {marginLeft: 10}]}
+                      activeOutlineColor={'black'}
+                      mode="outlined"
+                      outlineColor={'black'}
+                      onChangeText={text => setDieselKm(text)}
+                      keyboardType="number-pad"
+                    />
                   </View>
+                  <TextInput
+                    label="Other Expense Name"
+                    value={otherExpenseName}
+                    style={styles.valueText}
+                    activeOutlineColor={'black'}
+                    mode="outlined"
+                    outlineColor={'black'}
+                    onChangeText={text => setOtherExpenseName(text)}
+                    keyboardType="ascii-capable"
+                  />
+                  <TextInput
+                    label="Other Expense Amount"
+                    value={otherExpenseAmount}
+                    style={styles.valueText}
+                    activeOutlineColor={'black'}
+                    mode="outlined"
+                    outlineColor={'black'}
+                    onChangeText={text => setOtherExpenseAmount(text)}
+                    keyboardType="number-pad"
+                  />
+                <TouchableOpacity style={{marginTop:20,backgroundColor:'#155e75',width:180,paddingVertical:10,borderRadius:20}} onPress={() => SetSignaturePadShow(true)}>
+                  <Text style={{color: 'white',textAlign:'center',fontFamily:FONTS.FontRobotoBold}}>customer Signature Pad</Text>
+                </TouchableOpacity>
                 </View>
+                {signaturePadShow && (
+                  <Modal
+                    isVisible={signaturePadShow}
+                    onBackdropPress={() => SetSignaturePadShow(false)}
+                    onBackButtonPress={() => SetSignaturePadShow(false)}
+                    style={{justifyContent: 'center'}}
+                    animationType="fade">
+                    <View style={styles.container}>
+                      <SignatureCapture
+                        style={styles.signature}
+                        ref={signatureRef}
+                        onSaveEvent={handleSaveEvent}
+                        saveImageFileInExtStorage={false}
+                        showNativeButtons={false} 
+                        showTitleLabel={true} 
+                        viewMode={'portrait'}
+                      />
+                      <View
+                        style={{flexDirection: 'row', padding: 20, gap: 30}}>
+                        <TouchableOpacity style={styles.ButtonRoot}>
+                          <Text
+                            style={{
+                              color: 'white',
+                              fontFamily: FONTS.FontRobotoBold,
+                              fontSize: 16,
+                            }}
+                            onPress={handleSave}>
+                            Update
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.ButtonRoot}>
+                          <Text
+                            style={{
+                              color: 'white',
+                              fontFamily: FONTS.FontRobotoBold,
+                              fontSize: 16,
+                            }}
+                            onPress={handleReset}>
+                            Cancel
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </Modal>
+                )}
               </ScrollView>
             </View>
             <View
@@ -871,5 +1021,22 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'white',
     textTransform: 'capitalize',
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  signature: {
+    height: Display.setHeight(45),
+    borderColor: 'white',
+    borderWidth: 1,
+    width: '100%',
+  },
+  ButtonRoot: {
+    backgroundColor: '#f59e0b',
+    paddingVertical: 11,
+    paddingHorizontal: 35,
+    borderRadius: 20,
   },
 });

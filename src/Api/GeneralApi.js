@@ -192,6 +192,13 @@ class GeneralApiFetch {
     );
     return reponse;
   }
+  UpdateCustomerSignature(payload) {
+    const reponse = axios.post(
+      `${constants.baseURL}user/update-customer-signature`,
+      payload
+    );
+    return reponse;
+  }
 
 }
 

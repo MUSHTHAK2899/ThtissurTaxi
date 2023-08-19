@@ -25,7 +25,7 @@ import {format} from 'date-fns';
 const Drivers = ({navigation, route}) => {
   const toast = useToast();
   const {id} = route.params;
-  console.log(id);
+  // console.log(id);
   const [userLoginData, setUserLoginData] = useState({});
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -101,16 +101,16 @@ const Drivers = ({navigation, route}) => {
     setIsLoading(true);
     const res = await Api.GetMyWallet(1, id).catch(err => {
       setIsLoading(false);
-      console.log(err);
+      // console.log(err);
     });
     if (res.data && res.data.status == 200) {
       setIsLoading(false);
-      console.log('GetMyWallet res', res);
+      // console.log('GetMyWallet res', res);
       setWalletData(res?.data?.data?.transactions );
       setWalletSummary(res?.data?.data?.transaction_summary);
       setTotalPages(res?.data?.data?.meta?.total_pages);
     } else {
-      console.log('GetMyWallet res 2', res);
+      // console.log('GetMyWallet res 2', res);
       setIsLoading(false);
     }
   };
@@ -118,11 +118,11 @@ const Drivers = ({navigation, route}) => {
     setIsLoading(true);
     const res = await Api.GetMyWallet(currentPage, id).catch(err => {
       setIsLoading(false);
-      console.log(err);
+      // console.log(err);
     });
     if (res.data && res.data.status == 200) {
       setIsLoading(false);
-      console.log('GetMyWallet res', res);
+      // console.log('GetMyWallet res', res);
       setWalletData(prevData => [
         ...prevData,
         ...res?.data?.data?.transactions,
@@ -130,7 +130,7 @@ const Drivers = ({navigation, route}) => {
       setWalletSummary(res?.data?.data?.transaction_summary);
       setTotalPages(res?.data?.data?.meta?.total_pages);
     } else {
-      console.log('GetMyWallet res 2', res);
+      // console.log('GetMyWallet res 2', res);
       setIsLoading(false);
     }
   };
@@ -138,7 +138,7 @@ const Drivers = ({navigation, route}) => {
   const onEndReachedEnd = () => {
     if (!isLoading) {
       if (currentPage == totalPages) {
-        console.log('pages is equal reached');
+        // console.log('pages is equal reached');
       } else {
         setCurrentPage(prevPage => prevPage + 1);   
       }
@@ -147,14 +147,8 @@ const Drivers = ({navigation, route}) => {
 
   const HandleTransaction = async () => {
     toast.hideAll()
-    console.log("TransactionDateTime",TransactionDateTime,id,amount,value,DisCription)
+    // console.log("TransactionDateTime",TransactionDateTime,id,amount,value,DisCription)
     setLoading(true);
-    if (!amount || !DisCription ) {
-      setLoading(false);
-      toast.show("The fields are required",{
-        type:'danger',
-      });
-    } else {
       const res = await Api.AdminMakeTransaction({
         driver_id:id,
         amount:amount,
@@ -163,29 +157,30 @@ const Drivers = ({navigation, route}) => {
         description:DisCription
       }).catch(err => {
         setLoading(false);
-        console.log(err);
+        // console.log(err);
         toast.show( `${err?.message}`,{
           type:'danger',
         });
       });
       if (res.data && res.data.status == 200) {
+        setAmount('')
+        setDisCription('')
         setIsModalVisible(false)
         setWalletData([]);
         GetMyWalletFirst()
         setCurrentPage(1);
         setLoading(false);
-        console.log('AddDriver res', res?.data);
+        // console.log('AddDriver res', res?.data);
         toast.show( `${res.data?.message}`,{
           type:'success',
         });
       } else {
         setLoading(false);
-        console.log('AddDriver res 2', res.data);
+        // console.log('AddDriver res 2', res.data);
         toast.show( `${res.data?.message}`,{
           type:'warning',
         });
       }
-    }
   };
 
   const ListHeaderComponent = () => {
@@ -196,7 +191,7 @@ const Drivers = ({navigation, route}) => {
             width: '90%',
             alignSelf: 'center',
             marginBottom: 20,
-            backgroundColor: '#64748b',
+            backgroundColor: '#fde68a',
             borderRadius: 15,
             elevation: 10,
           }}>
@@ -205,26 +200,26 @@ const Drivers = ({navigation, route}) => {
               style={{flexDirection: 'row', justifyContent: 'space-between'}}>
               <Text
                 style={{
-                  color: 'white',
+                  color: 'black',
                   fontFamily: FONTS.FontRobotoMedium,
                   fontSize: 16,
                 }}>
-                <Text style={{color: 'white'}}>Completed Trips</Text> :{' '}
+                <Text style={{color: 'black'}}>Completed Trips</Text> :{' '}
                 {WalletSummary?.completed_trips_count}
               </Text>
               <Text
                 style={{
-                  color: 'white',
+                  color: 'black',
                   fontFamily: FONTS.FontRobotoMedium,
                   fontSize: 16,
                 }}>
-                <Text style={{color: 'white'}}>Approved Trips </Text>:{' '}
+                <Text style={{color: 'black'}}>Approved Trips </Text>:{' '}
                 {WalletSummary?.approved_trips_count}
               </Text>
             </View>
             <Text
               style={{
-                color: 'white',
+                color: 'black',
                 fontFamily: FONTS.FontRobotoMedium,
                 fontSize: 25,
                 textAlign: 'center',
@@ -250,20 +245,20 @@ const Drivers = ({navigation, route}) => {
               }}>
               <Text
                 style={{
-                  color: 'white',
+                  color: 'black',
                   fontFamily: FONTS.FontRobotoRegular,
                   fontSize: 13,
                 }}>
-                <Text style={{color: 'white'}}>Tips Amount</Text> : ₹
+                <Text style={{color: 'black'}}>Tips Amount</Text> : ₹
                 {WalletSummary?.trips_amount}
               </Text>
               <Text
                 style={{
-                  color: 'white',
+                  color: 'black',
                   fontFamily: FONTS.FontRobotoRegular,
                   fontSize: 13,
                 }}>
-                <Text style={{color: 'white'}}>Amount Recived </Text>: ₹
+                <Text style={{color: 'black'}}>Amount Recived </Text>: ₹
                 {WalletSummary?.received_amount}
               </Text>
             </View>
@@ -294,7 +289,8 @@ const Drivers = ({navigation, route}) => {
                     fontSize: 14,
                     fontFamily: FONTS.FontRobotoRegular,
                   }}>
-                  {item?.transaction_on}
+                 { format(new Date(item?.transaction_on), 'dd-MM-yyyy  h:mm a')}
+                  {}
                 </Text>
                 <Text
                   style={{
@@ -353,7 +349,7 @@ const Drivers = ({navigation, route}) => {
         }}>
         <Text
           style={{
-            color: COLORS.ColorGray3,
+            color: 'gray',
             fontSize: 20,
             fontFamily: FONTS.FontRobotoMedium,
             marginBottom: 50,
@@ -393,7 +389,7 @@ const Drivers = ({navigation, route}) => {
                 gap: 40,
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={()=>setIsModalVisible(true)}>
+              <TouchableOpacity onPress={()=>{setIsModalVisible(true),setTransactionDate(new Date()),setTransactionTime(new Date())}}>
                 <MaterialIcons
                   name={'my-library-add'}
                   color={'black'}
@@ -448,6 +444,7 @@ const Drivers = ({navigation, route}) => {
         setShowPicker={setShowPicker}
         showPicker={showPicker}
         setShowPickerTime={setShowPickerTime}
+        loading={loading}
         showPickerTime={showPickerTime}
       />
     </>

@@ -43,14 +43,14 @@ const Login = ({navigation}) => {
         password: password,
       }).catch(err => {
         setLoading(false);
-        console.log(err);
+        // console.log(err);
         toast.show( `${err?.message}`,{
           type:'danger',
         });
       });
       if (res.data && res.data.status == 200) {
         setLoading(false);
-        console.log('login res', res?.data);
+        // console.log('login res', res?.data);
         setUserLoginData(res?.data?.data?.user_data);
         AsyncStorage.setItem(
           'userAccessToken',
@@ -69,10 +69,10 @@ const Login = ({navigation}) => {
         } else {
           navigation.navigate('Otp', {Data: res?.data?.data?.user_data});
         }
-        console.log('tokon', res?.data?.data?.user_data?.token);
+        // console.log('tokon', res?.data?.data?.user_data?.token);
       } else {
         setLoading(false);
-        console.log('login res 2', res.data);
+        // console.log('login res 2', res.data);
         toast.show( `${res.data?.message}`,{
           type:'warning',
         });
@@ -120,7 +120,7 @@ const Login = ({navigation}) => {
                 fontFamily: FONTS.FontRobotoBold,
                 fontSize: 18,
               }}>
-              Sign in to TaxiInThrissur
+              Sign in to Taxi In Thrissur
             </Text>
             <TextInput
               label="Email"
@@ -204,7 +204,7 @@ const Login = ({navigation}) => {
                   fontFamily: FONTS.FontRobotoMedium,
                   fontSize: 16,
                 }}>
-                Create An Acoount
+                Create An Account
               </Text>
             </TouchableOpacity>
           </View>

@@ -14,9 +14,10 @@ import {FONTS} from '../../Constants/Constants';
 import Hedder from '../../Componets/Hedder';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Feather from 'react-native-vector-icons/Feather';
+import {format} from 'date-fns';
 
 const PreviewTrip = ({navigation, route}) => {
-  const {userTripData, handleShareText} = route.params;
+  const {userTripData, handleShareText,HanldeDwonload} = route.params;
 
   return (
     <SafeAreaProvider style={{backgroundColor: '#fefce8'}}>
@@ -69,9 +70,8 @@ const PreviewTrip = ({navigation, route}) => {
                     name={'download'}
                     color={'black'}
                     size={25}
-                    onPress={() =>
-                      Linking.openURL(userTripData?.download_button_link)
-                    }
+                    // onPress={() =>HanldeDwonload()}
+                    onPress={() => Linking.openURL(userTripData?.download_button_link)}
                   />
                 )}
                 {userTripData?.share_button_status == 1 && (
@@ -115,28 +115,40 @@ const PreviewTrip = ({navigation, route}) => {
               Visit Places : {userTripData?.visit_places}
             </Text>
             <Text style={styles.CommonText}>
-              Garage Start Time: {userTripData?.garage_start_time}
+              Garage Start Date : {format(new Date(userTripData?.garage_start_time), 'dd-MM-yyyy')}
             </Text>
             <Text style={styles.CommonText}>
-              Garage Start KM: {userTripData?.garage_start_km}
+              Garage Start Time : {format(new Date(userTripData?.garage_start_time), 'h:mm a')}
             </Text>
             <Text style={styles.CommonText}>
-              Pick up Start Time: {userTripData?.pick_up_start_time}
+              Garage Start KM : {userTripData?.garage_start_km}
             </Text>
             <Text style={styles.CommonText}>
-              pick up Start KM: {userTripData?.pick_up_start_km}
+              Pick up Start Date : {format(new Date(userTripData?.pick_up_start_time), 'dd-MM-yyyy')} 
+            </Text>
+            <Text style={styles.CommonText}>
+              Pick up Start Time : {format(new Date(userTripData?.pick_up_start_time), 'h:mm a')} 
+            </Text>
+            <Text style={styles.CommonText}>
+              pick up Start KM : {userTripData?.pick_up_start_km}
             </Text>
             <Text style={styles.CommonText}>
               Drop End KM : {userTripData?.drop_end_km}
             </Text>
             <Text style={styles.CommonText}>
-              Drop End Time : {userTripData?.drop_end_time}
+              Drop End Date : {format(new Date(userTripData?.drop_end_time), 'dd-MM-yyyy')} 
+            </Text>
+            <Text style={styles.CommonText}>
+              Drop End Time : {format(new Date(userTripData?.drop_end_time), 'h:mm a')} 
             </Text>
             <Text style={styles.CommonText}>
               Garage End KM : {userTripData?.garage_end_km}
             </Text>
             <Text style={styles.CommonText}>
-              Garage End Time : {userTripData?.garage_end_time}
+              Garage End Date :  {format(new Date(userTripData?.garage_end_time), 'dd-MM-yyyy')} 
+            </Text>
+            <Text style={styles.CommonText}>
+              Garage End Time : {format(new Date(userTripData?.garage_end_time), 'h:mm a')} 
             </Text>
             <Text style={styles.CommonText}>
               Night Halt Amount: ₹ {userTripData?.night_halt_amount}
@@ -162,7 +174,7 @@ const PreviewTrip = ({navigation, route}) => {
             </Text> */}
 
             <Text style={styles.CommonText}>
-              Trip Date: ₹ {userTripData?.trip_date}
+              Trip Date: {format(new Date(userTripData?.trip_date), 'dd-MM-yyyy')}
             </Text>
             <Text style={styles.CommonText}>
               Diesel KM : {userTripData?.diesel_km}
@@ -172,6 +184,12 @@ const PreviewTrip = ({navigation, route}) => {
             </Text>
             <Text style={styles.CommonText}>
               Total KM: ₹ {userTripData?.total_km}
+            </Text>
+            <Text style={styles.CommonText}>
+            Other Expense Name:  {userTripData?.other_expense_name}
+            </Text>
+            <Text style={styles.CommonText}>
+            Other Expense Amount: ₹ {userTripData?.other_expense_amount}
             </Text>
           </View>
         </View>
@@ -189,7 +207,7 @@ const styles = StyleSheet.create({
   },
   CommonText: {
     color: 'black',
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: FONTS.FontRobotoRegular,
     marginBottom: 5,
   },

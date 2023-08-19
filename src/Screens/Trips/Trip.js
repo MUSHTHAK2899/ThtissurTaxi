@@ -9,10 +9,12 @@ import {
   FlatList,
   Share,
   ActivityIndicator,
+  PermissionsAndroid,
   Linking,
+  Platform,
   Alert,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Hedder from '../../Componets/Hedder';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {DriveLIst} from '../../Componets/DummyData';
@@ -25,9 +27,13 @@ import Feather from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useToast } from "react-native-toast-notifications";
+import {useToast} from 'react-native-toast-notifications';
+import RNFetchBlob from 'rn-fetch-blob';
+import {format} from 'date-fns';
+import Toast from 'react-native-root-toast';
 
 const Trip = ({navigation}) => {
+  const scrollViewRef = useRef(null);
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [userLoginData, setUserLoginData] = useState({});
@@ -35,6 +41,7 @@ const Trip = ({navigation}) => {
   const [totalPages, setTotalPages] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
 
   const handleShareText = async text => {
     try {
@@ -45,17 +52,17 @@ const Trip = ({navigation}) => {
 
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
-          console.log(
-            `Shared successfully to activity: ${result.activityType}`,
-          );
+          // console.log(
+          //   `Shared successfully to activity: ${result.activityType}`,
+          // );
         } else {
-          console.log('Shared successfully!');
+          // console.log('Shared successfully!');
         }
       } else if (result.action === Share.dismissedAction) {
-        console.log('Share dismissed!');
+        // console.log('Share dismissed!');
       }
     } catch (error) {
-      console.error('Error sharing:', error.message);
+      // console.error('Error sharing:', error.message);
     }
   };
 
@@ -81,28 +88,28 @@ const Trip = ({navigation}) => {
   };
 
   const handleDeleteApi = async id => {
-    toast.hideAll()
+    toast.hideAll();
     setLoading(true);
     const res = await Api.AdminDeleteTrip({trip_id: id}).catch(err => {
       setLoading(false);
-      console.log(err);
-      toast.show( `${err?.message}`,{
-        type:'danger',
+      // console.log(err);
+      toast.show(`${err?.message}`, {
+        type: 'danger',
       });
     });
     if (res.data && res.data.status == 200) {
       setLoading(false);
       const newDataArray = userTripData.filter(item => item?.trip_id !== id);
       setUserTripData(newDataArray);
-      console.log('AdminDeleteTrip res', res);
-      toast.show( `${res.data?.message}`,{
-        type:'success',
+      // console.log('AdminDeleteTrip res', res);
+      toast.show(`${res.data?.message}`, {
+        type: 'success',
       });
     } else {
       setLoading(false);
-      console.log('AdminDeleteTrip res 2', res);
-      toast.show( `${res.data?.message}`,{
-        type:'warning',
+      // console.log('AdminDeleteTrip res 2', res);
+      toast.show(`${res.data?.message}`, {
+        type: 'warning',
       });
     }
   };
@@ -110,15 +117,15 @@ const Trip = ({navigation}) => {
     setIsLoading(true);
     const res = await Api.GetTrips(1).catch(err => {
       setIsLoading(false);
-      console.log(err);
+      // console.log(err);
     });
     if (res.data && res.data.status == 200) {
       setIsLoading(false);
-      console.log('GetTrips res', res);
+      // console.log('GetTrips res', res);
       setUserTripData(res?.data?.data?.trips);
       setTotalPages(res?.data?.data?.meta?.total_pages);
     } else {
-      console.log('GetTrips res 2', res);
+      // console.log('GetTrips res 2', res);
       setIsLoading(false);
     }
   };
@@ -126,15 +133,15 @@ const Trip = ({navigation}) => {
     setIsLoading(true);
     const res = await Api.GetTrips(currentPage).catch(err => {
       setIsLoading(false);
-      console.log(err);
+      // console.log(err);
     });
     if (res.data && res.data.status == 200) {
       setIsLoading(false);
-      console.log('GetTrips res', res);
+      // console.log('GetTrips res', res);
       setUserTripData(prevData => [...prevData, ...res?.data?.data?.trips]);
       setTotalPages(res?.data?.data?.meta?.total_pages);
     } else {
-      console.log('GetTrips res 2', res);
+      // console.log('GetTrips res 2', res);
       setIsLoading(false);
     }
   };
@@ -142,7 +149,7 @@ const Trip = ({navigation}) => {
   const onEndReachedEnd = () => {
     if (!isLoading) {
       if (currentPage == totalPages) {
-        console.log('pages is equal reached');
+        // console.log('pages is equal reached');
       } else {
         setCurrentPage(prevPage => prevPage + 1);
       }
@@ -163,12 +170,95 @@ const Trip = ({navigation}) => {
       setUserLoginData(acyncType);
       GetTripsFirst();
       setCurrentPage(1);
+      // scrollViewRef.current.scrollToOffset({ offset: 0, animated: true });
     });
     return unsubscribe;
   }, [navigation]);
 
+  const HanldeDwonload = item => {
+    const fileUrl = 'https://www.africau.edu/images/default/sample.pdf';
+
+    if (Platform.OS === 'android') {
+      getDownloadPermissionAndroid()
+        .then(granted => {
+          if (granted) {
+            downloadFile(item);
+            setToastVisible(true);
+            setTimeout(() => setToastVisible(false), 3000);
+          }
+        })
+        .catch(err => {
+          // console.log(err);
+        });
+    } else {
+      downloadFile(item).then(res => {
+        RNFetchBlob.ios.previewDocument(res.path());
+      });
+    }
+  };
+
+  const getDownloadPermissionAndroid = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'File Download Permission',
+          message: 'Your permission is required to save Files to your device',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) return true;
+    } catch (err) {
+      // console.log('err', err);
+    }
+  };
+
+  const downloadFile = async url => {
+    // Get the app's cache directory
+    const {config, fs} = RNFetchBlob;
+    const cacheDir = fs.dirs.DownloadDir;
+
+    // Generate a unique filename for the downloaded image
+    const filename = url.split('/').pop();
+    const imagePath = `${cacheDir}/${filename}`;
+
+    try {
+      // Download the file and save it to the cache directory
+      const configOptions = Platform.select({
+        ios: {
+          fileCache: true,
+          path: imagePath,
+          appendExt: filename.split('.').pop(),
+        },
+        android: {
+          fileCache: true,
+          path: imagePath,
+          appendExt: filename.split('.').pop(),
+          addAndroidDownloads: {
+            // Related to the Android only
+            useDownloadManager: true,
+            notification: true,
+            path: imagePath,
+            description: 'File',
+          },
+        },
+      });
+
+      const response = await RNFetchBlob.config(configOptions).fetch(
+        'GET',
+        url,
+      );
+
+      // Return the path to the downloaded file
+      return response;
+    } catch (error) {
+      // console.error("error",error);
+      return null;
+    }
+  };
+
   const OnDriveList = ({item}) => {
-    console.log("item", item);
     return (
       <>
         <View
@@ -202,16 +292,8 @@ const Trip = ({navigation}) => {
                   fontSize: 13,
                   fontFamily: FONTS.FontRobotoRegular,
                 }}>
-                {item?.trip_date}
+                {format(new Date(item?.trip_date), 'dd-MM-yyyy')}
               </Text>
-              {/* <Text
-                style={{
-                  color: 'black',
-                  fontSize: 13,
-                  fontFamily: FONTS.FontRobotoRegular,
-                }}>
-                {item?.end_date}
-              </Text> */}
             </View>
             <Text
               style={{
@@ -277,6 +359,8 @@ const Trip = ({navigation}) => {
                       userTripData: item,
                       handleShareText: () =>
                         handleShareText(item?.share_button_text),
+                      HanldeDwonload: () =>
+                        HanldeDwonload(item?.download_button_link),
                     })
                   }>
                   <MaterialIcons name={'eye'} color={'white'} size={25} />
@@ -294,9 +378,8 @@ const Trip = ({navigation}) => {
                       name={'download'}
                       color={'white'}
                       size={25}
-                      onPress={() =>
-                        Linking.openURL(item?.download_button_link)
-                      }
+                      // onPress={() => HanldeDwonload(item?.download_button_link)}
+                      onPress={() => Linking.openURL(item?.download_button_link)}
                     />
                   </TouchableOpacity>
                 )}
@@ -322,6 +405,29 @@ const Trip = ({navigation}) => {
       </>
     );
   };
+
+  const ListEmpty = () => {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: Display.setHeight(35),
+        }}>
+        <Text
+          style={{
+            color: 'gray',
+            fontSize: 20,
+            fontFamily: FONTS.FontRobotoMedium,
+            marginBottom: 50,
+          }}>
+          No data found !
+        </Text>
+      </View>
+    );
+  };
+
   return (
     <>
       <SafeAreaProvider style={{backgroundColor: '#fefce8'}}>
@@ -339,8 +445,10 @@ const Trip = ({navigation}) => {
             marginTop: 20,
           }}>
           <FlatList
+          ref={scrollViewRef}
             showsVerticalScrollIndicator={false}
             data={userTripData}
+            ListEmptyComponent={ListEmpty}
             renderItem={OnDriveList}
             keyExtractor={(item, index) => {
               return index;
@@ -357,6 +465,14 @@ const Trip = ({navigation}) => {
           />
         </View>
         {loading && <LoadingMoadal />}
+        <Toast
+          visible={toastVisible}
+          position={Toast.positions.BOTTOM} // Adjust the position (50 = 50% from the bottom)
+          shadow={false}
+          animation={true}
+          hideOnPress={true}>
+          Dwonloading...
+        </Toast>
       </SafeAreaProvider>
     </>
   );

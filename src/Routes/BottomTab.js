@@ -20,7 +20,6 @@ const BottomTab = ({navigation}) => {
     var accessuser = await AsyncStorage.getItem('userDetails');
     const acyncType = JSON.parse(accessuser);
     setUserLoginData(acyncType);
-    console.log('loginData', acyncType);
   };
 
   useEffect(() => {

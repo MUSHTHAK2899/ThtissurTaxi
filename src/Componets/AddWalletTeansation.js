@@ -36,7 +36,8 @@ const AddWalletTransation = props => {
     setShowPicker,
     showPicker,
     setShowPickerTime,
-    showPickerTime
+    showPickerTime,
+    loading
   } = props;
 
   return (
@@ -78,7 +79,7 @@ const AddWalletTransation = props => {
           />
           <DropDown
             value={TransactionDate ? format(TransactionDate, 'dd/MM/yy') : ''}
-            label={'Transaction on Date'}
+            label={'Transaction Date'}
             onPress={() => setShowPicker(true)}
             width={''}
             color={'white'}
@@ -100,7 +101,7 @@ const AddWalletTransation = props => {
                   })
                 : ''
             }
-            label={'Transaction on Time'}
+            label={'Transaction Time'}
             onPress={() => setShowPickerTime(true)}
             width={''}
             color={'white'}
@@ -126,7 +127,7 @@ const AddWalletTransation = props => {
           </View>
           <View style={{marginBottom: 20}}>
             <TextInput
-              label="DisCription"
+              label="Description"
               value={DisCription}
               style={styles.valueText}
               multiline={true}
@@ -137,6 +138,7 @@ const AddWalletTransation = props => {
             />
           </View>
           <TouchableOpacity
+          disabled={loading}
             onPress={HandleTransaction}
             style={[styles.buttonView, {backgroundColor: '#28a745'}]}>
             <Text style={styles.buttonText}>Submit</Text>

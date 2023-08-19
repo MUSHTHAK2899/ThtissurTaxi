@@ -6,10 +6,10 @@ import {
   StatusBar,
   Image,
   TouchableOpacity,
-  ScrollView,
   KeyboardAvoidingView,
   Button,
   BackHandler,
+  ScrollView
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
@@ -22,7 +22,7 @@ import DropDown from '../../Componets/DropDwon';
 import {format} from 'date-fns';
 import Api from '../../Api/GeneralApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useToast } from "react-native-toast-notifications";
+import {useToast} from 'react-native-toast-notifications';
 import LoadingMoadal from '../../Componets/LoadingMoadal';
 
 const EditForm = ({navigation, route}) => {
@@ -68,6 +68,8 @@ const EditForm = ({navigation, route}) => {
   const [DriverBataPerKM, setDriverBataPerKM] = useState(
     String(item?.driver_bata),
   );
+  const [otherExpenseName, setOtherExpenseName] = useState(item?.other_expense_name);
+  const [otherExpenseAmount, setOtherExpenseAmount] = useState(String(item?.other_expense_amount));
   // start garage time
   const [startGrageDate, setstartGrageDate] = useState(
     new Date(item?.garage_start_time),
@@ -206,16 +208,20 @@ const EditForm = ({navigation, route}) => {
   };
 
   const GrageStartTime = format(startGrageDate, 'yyyy-MM-dd').concat(
-    ' ', format(startGrageTime, 'HH:mm:ss'),
+    ' ',
+    format(startGrageTime, 'HH:mm:ss'),
   );
   const GarageEndTime = format(endGrageDate, 'yyyy-MM-dd').concat(
-    ' ', format(endGrageTime, 'HH:mm:ss'),
+    ' ',
+    format(endGrageTime, 'HH:mm:ss'),
   );
   const PickUpStartTime = format(startDatePickupPoint, 'yyyy-MM-dd').concat(
-    ' ', format(startTimePickupPoint, 'HH:mm:ss'),
+    ' ',
+    format(startTimePickupPoint, 'HH:mm:ss'),
   );
   const DropEndTime = format(endDateDropPoint, 'yyyy-MM-dd').concat(
-    ' ',format(endTimeDropPoint, 'HH:mm:ss'),
+    ' ',
+    format(endTimeDropPoint, 'HH:mm:ss'),
   );
 
   const Data = {
@@ -247,45 +253,23 @@ const EditForm = ({navigation, route}) => {
     diesel_amount: +DieselAmount,
     diesel_km: +DieselKm,
     driver_bata: +DriverBataPerKM,
+    other_expense_name:otherExpenseName,
+    other_expense_amount:+otherExpenseAmount
   };
 
   const HandleApprove = async () => {
     setLoading(true);
-    console.log('data', Data);
-    if (
-      !VehicleNumber ||
-      !DriverName ||
-      !ClientName ||
-      !CompanyName ||
-      !PickUp ||
-      !VisitPlace ||
-      !Drop ||
-      !StartingKMGarage ||
-      !EndKMGarage ||
-      !StartingKMPickupPoint ||
-      !EndingKMPickupPoint ||
-      !NumberofDays ||
-      !NumberofNight ||
-      !PerimitTollParkingAmount ||
-      !DieselAmount ||
-      !DieselKm
-    ) {
-      setLoading(false);
-      toast.show("some mandatory fields are missing",{
-        type:'danger',
-      });
-    } else {
       const res = await Api.ApproveTrip(Data).catch(err => {
         setLoading(false);
-        console.log(err);
-        toast.show( `${err?.message}`,{
-          type:'danger',
+        // console.log(err);
+        toast.show(`${err?.message}`, {
+          type: 'danger',
         });
       });
       if (res.data && res.data.status == 200) {
-        navigation.navigate('My Trips')
+        navigation.navigate('My Trips');
         setLoading(false);
-        console.log('UpdateTrip res', res);
+        // console.log('UpdateTrip res', res);
         AsyncStorage.setItem(
           'TripDetails',
           JSON.stringify(res.data?.data?.trip_data),
@@ -294,17 +278,16 @@ const EditForm = ({navigation, route}) => {
           'TripSatus',
           JSON.stringify(res.data?.data?.trip_data),
         );
-        toast.show( `${res.data?.message}`,{
-          type:'success',
+        toast.show(`${res.data?.message}`, {
+          type: 'success',
         });
       } else {
         setLoading(false);
-        console.log('UpdateTrip res 2', res);
-        toast.show( `${res.data?.message}`,{
-          type:'warning',
+        // console.log('UpdateTrip res 2', res);
+        toast.show(`${res.data?.message}`, {
+          type: 'warning',
         });
       }
-    }
   };
 
   return (
@@ -321,9 +304,9 @@ const EditForm = ({navigation, route}) => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{flex: 1, backgroundColor: '#fefce8'}}>
           <View style={{flex: 1}}>
-            <ScrollView style={{flex: 1, backgroundColor: '#fefce8'}}
-            showsVerticalScrollIndicator={false}
-            >
+            <ScrollView
+              style={{flex: 1, backgroundColor: '#fefce8'}}
+              showsVerticalScrollIndicator={false}>
               <View
                 style={{
                   backgroundColor: '#fefce8',
@@ -377,7 +360,7 @@ const EditForm = ({navigation, route}) => {
                   keyboardType="ascii-capable"
                 />
                 <DropDown
-                color={'#fefce8'}
+                  color={'#fefce8'}
                   value={tripDate ? format(tripDate, 'dd/MM/yy') : ''}
                   label={'Trip Date'}
                   onPress={() => setshowtripDate(true)}
@@ -391,16 +374,6 @@ const EditForm = ({navigation, route}) => {
                     onChange={handleTripDate}
                   />
                 )}
-                <TextInput
-                  label="Night Halt Amount"
-                  value={NightHalfAmount}
-                  style={styles.valueText}
-                  activeOutlineColor={'black'}
-                  mode="outlined"
-                  outlineColor={'black'}
-                  onChangeText={text => setNightHalfAmount(text)}
-                  keyboardType="ascii-capable"
-                />
                 <TextInput
                   label="Booking ID"
                   value={BookingID}
@@ -487,7 +460,7 @@ const EditForm = ({navigation, route}) => {
                   keyboardType="ascii-capable"
                 />
                 <DropDown
-                color={'#fefce8'}
+                  color={'#fefce8'}
                   value={
                     startGrageDate ? format(startGrageDate, 'dd/MM/yy') : ''
                   }
@@ -504,7 +477,7 @@ const EditForm = ({navigation, route}) => {
                   />
                 )}
                 <DropDown
-                color={'#fefce8'}
+                  color={'#fefce8'}
                   value={
                     startGrageTime
                       ? startGrageTime.toLocaleTimeString([], {
@@ -537,7 +510,7 @@ const EditForm = ({navigation, route}) => {
                   keyboardType="number-pad"
                 />
                 <DropDown
-                color={'#fefce8'}
+                  color={'#fefce8'}
                   value={
                     startDatePickupPoint
                       ? format(startDatePickupPoint, 'dd/MM/yy')
@@ -556,7 +529,7 @@ const EditForm = ({navigation, route}) => {
                   />
                 )}
                 <DropDown
-                color={'#fefce8'}
+                  color={'#fefce8'}
                   value={
                     startTimePickupPoint
                       ? startTimePickupPoint.toLocaleTimeString([], {
@@ -597,8 +570,8 @@ const EditForm = ({navigation, route}) => {
                   onChangeText={text => setEndingKMPickupPoint(text)}
                   keyboardType="number-pad"
                 />
-                                <DropDown
-                color={'#fefce8'}
+                <DropDown
+                  color={'#fefce8'}
                   value={
                     endDateDropPoint ? format(endDateDropPoint, 'dd/MM/yy') : ''
                   }
@@ -615,7 +588,7 @@ const EditForm = ({navigation, route}) => {
                   />
                 )}
                 <DropDown
-                color={'#fefce8'}
+                  color={'#fefce8'}
                   value={
                     endTimeDropPoint
                       ? endTimeDropPoint.toLocaleTimeString([], {
@@ -637,7 +610,7 @@ const EditForm = ({navigation, route}) => {
                   />
                 )}
                 <DropDown
-                color={'#fefce8'}
+                  color={'#fefce8'}
                   value={endGrageDate ? format(endGrageDate, 'dd/MM/yy') : ''}
                   label={'End Date Garage'}
                   onPress={() => setShowPickerEndDate(true)}
@@ -652,7 +625,7 @@ const EditForm = ({navigation, route}) => {
                   />
                 )}
                 <DropDown
-                color={'#fefce8'}
+                  color={'#fefce8'}
                   value={
                     endGrageTime
                       ? endGrageTime.toLocaleTimeString([], {
@@ -683,26 +656,36 @@ const EditForm = ({navigation, route}) => {
                   onChangeText={text => setEndKMGarage(text)}
                   keyboardType="number-pad"
                 />
-                  <TextInput
-                    label="Number of Days"
-                    value={NumberofDays}
-                    style={styles.valueText}
-                    activeOutlineColor={'black'}
-                    mode="outlined"
-                    outlineColor={'black'}
-                    onChangeText={text => setNumberofDays(text)}
-                    keyboardType="ascii-capable"
-                  />
-                  <TextInput
-                    label="Number of Nights"
-                    value={NumberofNight}
-                    style={[styles.valueText]}
-                    activeOutlineColor={'black'}
-                    mode="outlined"
-                    outlineColor={'black'}
-                    onChangeText={text => setNumberofNight(text)}
-                    keyboardType="ascii-capable"
-                  />
+                <TextInput
+                  label="Number of Days"
+                  value={NumberofDays}
+                  style={styles.valueText}
+                  activeOutlineColor={'black'}
+                  mode="outlined"
+                  outlineColor={'black'}
+                  onChangeText={text => setNumberofDays(text)}
+                  keyboardType="ascii-capable"
+                />
+                <TextInput
+                  label="Number of Nights"
+                  value={NumberofNight}
+                  style={[styles.valueText]}
+                  activeOutlineColor={'black'}
+                  mode="outlined"
+                  outlineColor={'black'}
+                  onChangeText={text => setNumberofNight(text)}
+                  keyboardType="ascii-capable"
+                />
+                <TextInput
+                  label="Night Halt Amount"
+                  value={NightHalfAmount}
+                  style={styles.valueText}
+                  activeOutlineColor={'black'}
+                  mode="outlined"
+                  outlineColor={'black'}
+                  onChangeText={text => setNightHalfAmount(text)}
+                  keyboardType="ascii-capable"
+                />
 
                 <TextInput
                   label="Perimit,Toll & Parking Amount"
@@ -714,30 +697,31 @@ const EditForm = ({navigation, route}) => {
                   onChangeText={text => setPerimitTollParkingAmount(text)}
                   keyboardType="number-pad"
                 />
-<View style={{flexDirection:'row'}}>
-                <TextInput
-                  label="Diesel Amount"
-                  value={DieselAmount}
-                  style={styles.valueText2}
-                  activeOutlineColor={'black'}
-                  mode="outlined"
-                  outlineColor={'black'}
-                  onChangeText={text => setDieselAmount(text)}
-                  keyboardType="number-pad"
-                />
-                <TextInput
-                  label="Diesel Km"
-                  value={DieselKm}
-                  style={[styles.valueText2,{marginLeft:10}]}
-                  activeOutlineColor={'black'}
-                  mode="outlined"
-                  outlineColor={'black'}
-                  onChangeText={text => setDieselKm(text)}
-                  keyboardType="number-pad"
-                />
+
+                <View style={{flexDirection: 'row'}}>
+                  <TextInput
+                    label="Diesel Amount"
+                    value={DieselAmount}
+                    style={styles.valueText2}
+                    activeOutlineColor={'black'}
+                    mode="outlined"
+                    outlineColor={'black'}
+                    onChangeText={text => setDieselAmount(text)}
+                    keyboardType="number-pad"
+                  />
+                  <TextInput
+                    label="Diesel Km"
+                    value={DieselKm}
+                    style={[styles.valueText2, {marginLeft: 10}]}
+                    activeOutlineColor={'black'}
+                    mode="outlined"
+                    outlineColor={'black'}
+                    onChangeText={text => setDieselKm(text)}
+                    keyboardType="number-pad"
+                  />
                 </View>
                 <TextInput
-                  label="Driver Bata Per KM"
+                  label="Driver Bata"
                   value={DriverBataPerKM}
                   style={styles.valueText}
                   activeOutlineColor={'black'}
@@ -746,6 +730,26 @@ const EditForm = ({navigation, route}) => {
                   onChangeText={text => setDriverBataPerKM(text)}
                   keyboardType="number-pad"
                 />
+                    <TextInput
+                    label="Other Expense Name"
+                    value={otherExpenseName}
+                    style={styles.valueText}
+                    activeOutlineColor={'black'}
+                    mode="outlined"
+                    outlineColor={'black'}
+                    onChangeText={text => setOtherExpenseName(text)}
+                    keyboardType="ascii-capable"
+                  />
+                  <TextInput
+                    label="Other Expense Amount"
+                    value={otherExpenseAmount}
+                    style={styles.valueText}
+                    activeOutlineColor={'black'}
+                    mode="outlined"
+                    outlineColor={'black'}
+                    onChangeText={text => setOtherExpenseAmount(text)}
+                    keyboardType="number-pad"
+                  />
               </View>
             </ScrollView>
           </View>

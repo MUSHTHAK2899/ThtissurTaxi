@@ -3,7 +3,6 @@ import React from 'react'
 import { createStackNavigator } from '@react-navigation/stack';
 import Splash from '../Screens/SplashScreen/Splash';
 import {NavigationContainer} from '@react-navigation/native';
-import Home from '../Screens/Home/Home';
 import Login from '../Screens/Login/Login';
 import OnBord from '../Screens/OnBordScreen/OnBord';
 import BottomTab from './BottomTab';
@@ -15,10 +14,12 @@ import ResetPassword from '../Screens/MyAccount/ResetPassword';
 import PreviewTrip from '../Screens/Trips/PreviewTrip';
 import EditForm from '../Screens/Trips/EditForm';
 import Wallet from '../Screens/Wallet/Index';
+import {useNetInfo} from '@react-native-community/netinfo';
+import NoInternet from '../utils/Nointernet';
 
 const Stack = createStackNavigator();
-
 const StackNavigation = () => {
+  const netInfo = useNetInfo();
   return (
     <NavigationContainer>
     <Stack.Navigator screenOptions={{
@@ -27,7 +28,7 @@ const StackNavigation = () => {
     <Stack.Screen name="Splash" component={Splash} />
     <Stack.Screen name="Login" component={Login} />
     <Stack.Screen name="OnBord" component={OnBord} />
-    <Stack.Screen name="Home" component={BottomTab} />
+    <Stack.Screen name="Home" component={ netInfo.isConnected ? BottomTab : NoInternet} />
     <Stack.Screen name="CreateAcount" component={CreateAcount} />
     <Stack.Screen name="Otp" component={Otp} />
     <Stack.Screen name="ForgotPassword" component={ForgotPassword} />

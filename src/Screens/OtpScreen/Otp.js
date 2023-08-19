@@ -68,11 +68,11 @@ const Login = ({navigation, route}) => {
           type: 'danger',
         });
         setLoading(false);
-        console.log(err);
+        // console.log(err);
       });
       if (res.data && res.data.status_code == 200) {
         setLoading(false);
-        console.log('otp verify res', res.data);
+        // console.log('otp verify res', res.data);
         AsyncStorage.setItem(
           'userDetails',
           JSON.stringify(res?.data?.data?.user_data),
@@ -85,7 +85,7 @@ const Login = ({navigation, route}) => {
         // console.log('tokon', res?.data?.data?.token);
       } else {
         setLoading(false);
-        console.log('otp verify res 2', res);
+        // console.log('otp verify res 2', res);
         toast.show(`${res.data?.message}`, {
           type: 'warning',
         });
@@ -97,11 +97,11 @@ const Login = ({navigation, route}) => {
     toast.hideAll();
     const res = await Api.ResendOtp({}).catch(err => {
       setLoading(false);
-      console.log(err);
+      // console.log(err);
     });
     if (res.data) {
       setLoading(false);
-      console.log('otp resend res', res);
+      // console.log('otp resend res', res);
       toast.show(`${res.data?.message}`, {
         type: 'success',
       });

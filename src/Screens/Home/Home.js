@@ -21,8 +21,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {Image} from 'react-native-elements';
+import {useNetInfo} from '@react-native-community/netinfo';
 
 const Home = ({navigation}) => {
+  const netInfo = useNetInfo();
   const [userLoginData, setUserLoginData] = useState({});
   const [loading, setLoading] = useState(false);
   const [graphData, setGraphData] = useState([]);
@@ -44,22 +46,29 @@ const Home = ({navigation}) => {
     return unsubscribe;
   }, [navigation]);
 
+  useEffect(() => {
+    if (netInfo.isConnected) {
+      userDetails();
+      HandleHome();
+    }
+  }, [netInfo]);
+
   const HandleHome = async () => {
     setLoading(true);
     const res = await Api.GetHomeData().catch(err => {
       setLoading(false);
-      console.log(err);
+      // console.log(err);
     });
     if (res.data && res.data.status == 200) {
       setLoading(false);
-      console.log('GetHomeData res', res);
+      // console.log('GetHomeData res', res);
       const GraphMonth = res?.data?.data?.graph_data.map(item => item?.month);
       setGraphData(GraphMonth);
       setGraphDataCont(res?.data?.data?.graph_data);
       setHomeDatas(res?.data?.data);
     } else {
       setLoading(false);
-      console.log('GetHomeData res 2', res);
+      // console.log('GetHomeData res 2', res);
     }
   };
 
@@ -121,127 +130,139 @@ const Home = ({navigation}) => {
         source={require('../../Assets/LoginPage.png')}
         style={{flex: 1}}
         resizeMode="stretch">
-        {HomeDatas?.banner_image_status == 1 && (
-          <Image
-            source={{uri: HomeDatas?.banner_images}}
-            style={{width: '100%', height: Display.setWidth(20)}}
-            resizeMode="stretch"
-          />
-        )}
-        <View
-          style={{
-            width: '90%',
-            alignSelf: 'center',
-            // backgroundColor: '#fefce8',
-            marginVertical: 15,
-          }}>
-          <View style={{marginBottom: 15}}>
-            {HomeDatas?.hello_text_status == 1 && (
-              <Text
-                style={{
-                  color: 'white',
-                  fontFamily: FONTS.FontRobotoMedium,
-                  fontSize: 14,
-                }}>
-                {HomeDatas?.hello_text}
-              </Text>
-            )}
+        {loading ? (
+          <View
+            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            <ActivityIndicator size="large" />
           </View>
-          {HomeDatas?.graph_status == 1 && (
-            <LineChart
-              data={data}
-              width={Display.setWidth(90)}
-              height={
-                userLoginData?.user_type == 'DriverAdmin'
-                  ? Display.setHeight(32)
-                  : Display.setHeight(42)
-              }
-              chartConfig={chartConfig}
-              style={{borderRadius: 15, elevation: 10}}
-              bezier
-            />
-          )}
-          <View style={{marginTop: 20, flexDirection: 'row', gap: 14}}>
-            <TouchableOpacity
-              style={[styles.buttonView]}
-              onPress={() => navigation.navigate('Drive')}>
-              <MaterialCommunityIcons
-                name={'steering'}
-                color={'black'}
-                size={30}
+        ) : (
+          <>
+            {HomeDatas?.banner_image_status == 1 && (
+              <Image
+                source={{uri: HomeDatas?.banner_images}}
+                style={{width: '100%', height: Display.setWidth(20)}}
+                resizeMode="stretch"
               />
-              <Text style={styles.buttonText}>Drive</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.buttonView]}
-              onPress={() => navigation.navigate('My Trips')}>
-              <FontAwesome name={'car'} color={'black'} size={30} />
-              <Text style={styles.buttonText}>My Trips</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.buttonView]}
-              onPress={() =>
-                navigation.navigate('Wallet', {id: userLoginData?.id})
-              }>
-              <FontAwesome5 name={'wallet'} color={'black'} size={30} />
-              <Text style={styles.buttonText}>My Wallet</Text>
-            </TouchableOpacity>
-          </View>
-          {userLoginData?.user_type == 'DriverAdmin' && (
-            <View style={{marginTop: 10, flexDirection: 'row', gap: 17}}>
-              <TouchableOpacity
-                style={[styles.buttonView, {width: Display.setWidth(42)}]}
-                onPress={() => navigation.navigate('Account')}>
-                <MaterialCommunityIcons
-                  name={'account'}
-                  color={'black'}
-                  size={30}
+            )}
+            <View
+              style={{
+                width: '90%',
+                alignSelf: 'center',
+                // backgroundColor: '#fefce8',
+                marginVertical: 15,
+              }}>
+              <View style={{marginBottom: 15}}>
+                {HomeDatas?.hello_text_status == 1 && (
+                  <Text
+                    style={{
+                      color: 'white',
+                      fontFamily: FONTS.FontRobotoMedium,
+                      fontSize: 14,
+                    }}>
+                    {HomeDatas?.hello_text}
+                  </Text>
+                )}
+              </View>
+              {HomeDatas?.graph_status == 1 && (
+                <LineChart
+                  data={data}
+                  width={Display.setWidth(90)}
+                  height={
+                    userLoginData?.user_type == 'DriverAdmin'
+                      ? Display.setHeight(32)
+                      : Display.setHeight(42)
+                  }
+                  chartConfig={chartConfig}
+                  style={{borderRadius: 15, elevation: 10}}
+                  bezier
                 />
-                <Text style={styles.buttonText}>My Account</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.buttonView, {width: Display.setWidth(42)}]}
-                onPress={() => navigation.navigate('Drivers')}>
-                <FontAwesome name={'users'} color={'black'} size={25} />
-                <Text style={styles.buttonText}>Drivers</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          {userLoginData?.user_type == 'DriverAdmin' ? (
-            <View style={{marginTop: 10, flexDirection: 'row', gap: 17}}>
-              <View style={[styles.buttonView, {width: Display.setWidth(42)}]}>
-                <Text style={[styles.buttonText, {fontSize: 17}]}>
-                  {HomeDatas?.driver_completed_trips} /{' '}
-                  {HomeDatas?.total_completed_trips}
-                </Text>
-                <Text style={styles.buttonText}>Completed Trips</Text>
+              )}
+              <View style={{marginTop: 20, flexDirection: 'row', gap: 14}}>
+                <TouchableOpacity
+                  style={[styles.buttonView]}
+                  onPress={() => navigation.navigate('Drive')}>
+                  <MaterialCommunityIcons
+                    name={'steering'}
+                    color={'black'}
+                    size={30}
+                  />
+                  <Text style={styles.buttonText}>Drive</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.buttonView]}
+                  onPress={() => navigation.navigate('My Trips')}>
+                  <FontAwesome name={'car'} color={'black'} size={30} />
+                  <Text style={styles.buttonText}>My Trips</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.buttonView]}
+                  onPress={() =>
+                    navigation.navigate('Wallet', {id: userLoginData?.id})
+                  }>
+                  <FontAwesome5 name={'wallet'} color={'black'} size={30} />
+                  <Text style={styles.buttonText}>My Wallet</Text>
+                </TouchableOpacity>
               </View>
-              <View style={[styles.buttonView, {width: Display.setWidth(42)}]}>
-                <Text style={[styles.buttonText, {fontSize: 17}]}>
-                  {HomeDatas?.driver_approved_trips} /{' '}
-                  {HomeDatas?.total_approved_trips}
-                </Text>
-                <Text style={styles.buttonText}>Approved Trips</Text>
-              </View>
+              {userLoginData?.user_type == 'DriverAdmin' && (
+                <View style={{marginTop: 10, flexDirection: 'row', gap: 17}}>
+                  <TouchableOpacity
+                    style={[styles.buttonView, {width: Display.setWidth(42)}]}
+                    onPress={() => navigation.navigate('Account')}>
+                    <MaterialCommunityIcons
+                      name={'account'}
+                      color={'black'}
+                      size={30}
+                    />
+                    <Text style={styles.buttonText}>My Account</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.buttonView, {width: Display.setWidth(42)}]}
+                    onPress={() => navigation.navigate('Drivers')}>
+                    <FontAwesome name={'users'} color={'black'} size={25} />
+                    <Text style={styles.buttonText}>Drivers</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              {userLoginData?.user_type == 'DriverAdmin' ? (
+                <View style={{marginTop: 10, flexDirection: 'row', gap: 17}}>
+                  <View
+                    style={[styles.buttonView, {width: Display.setWidth(42)}]}>
+                    <Text style={[styles.buttonText, {fontSize: 17}]}>
+                      {HomeDatas?.driver_completed_trips} /{' '}
+                      {HomeDatas?.total_completed_trips}
+                    </Text>
+                    <Text style={styles.buttonText}>Completed Trips</Text>
+                  </View>
+                  <View
+                    style={[styles.buttonView, {width: Display.setWidth(42)}]}>
+                    <Text style={[styles.buttonText, {fontSize: 17}]}>
+                      {HomeDatas?.driver_approved_trips} /{' '}
+                      {HomeDatas?.total_approved_trips}
+                    </Text>
+                    <Text style={styles.buttonText}>Approved Trips</Text>
+                  </View>
+                </View>
+              ) : (
+                <View style={{marginTop: 10, flexDirection: 'row', gap: 17}}>
+                  <TouchableOpacity
+                    style={[styles.buttonView, {width: Display.setWidth(42)}]}>
+                    <Text style={[styles.buttonText, {fontSize: 17}]}>
+                      {HomeDatas?.driver_completed_trips}
+                    </Text>
+                    <Text style={styles.buttonText}>Completed Trips</Text>
+                  </TouchableOpacity>
+                  <View
+                    style={[styles.buttonView, {width: Display.setWidth(42)}]}>
+                    <Text style={[styles.buttonText, {fontSize: 17}]}>
+                      {HomeDatas?.driver_approved_trips}
+                    </Text>
+                    <Text style={styles.buttonText}>Approved Trips</Text>
+                  </View>
+                </View>
+              )}
             </View>
-          ) : (
-            <View style={{marginTop: 10, flexDirection: 'row', gap: 17}}>
-              <TouchableOpacity
-                style={[styles.buttonView, {width: Display.setWidth(42)}]}>
-                <Text style={[styles.buttonText, {fontSize: 17}]}>
-                  {HomeDatas?.driver_completed_trips}
-                </Text>
-                <Text style={styles.buttonText}>Completed Trips</Text>
-              </TouchableOpacity>
-              <View style={[styles.buttonView, {width: Display.setWidth(42)}]}>
-                <Text style={[styles.buttonText, {fontSize: 17}]}>
-                  {HomeDatas?.driver_approved_trips}
-                </Text>
-                <Text style={styles.buttonText}>Approved Trips</Text>
-              </View>
-            </View>
-          )}
-        </View>
+          </>
+        )}
       </ImageBackground>
     </SafeAreaProvider>
   );

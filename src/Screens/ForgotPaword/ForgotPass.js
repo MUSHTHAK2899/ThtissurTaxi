@@ -38,21 +38,21 @@ import LoadingMoadal from '../../Componets/LoadingMoadal';
           email: email,
         }).catch(err => {
           setLoading(false);
-          console.log(err);
+          // console.log(err);
           toast.show( `${err?.message}`,{
             type:'danger',
           });
         });
         if (res.data && res.data.status ==200) {
           setLoading(false);
-          console.log('login res', res?.data);
+          // console.log('login res', res?.data);
           toast.show( `${res.data?.message}`,{
             type:'success',
           });
           navigation.navigate('ChangePassword',{email:email});
         } else {
           setLoading(false);
-          console.log('login res 2', res.data);
+          // console.log('login res 2', res.data);
           toast.show( `${res.data?.message}`,{
             type:'warning',
           });
@@ -100,7 +100,7 @@ import LoadingMoadal from '../../Componets/LoadingMoadal';
                   fontFamily: FONTS.FontRobotoBold,
                   fontSize: 18,
                 }}>
-                Forgot Password to TaxiInThrissur
+                Forgot Password
               </Text>
               <TextInput
                 label="Email"

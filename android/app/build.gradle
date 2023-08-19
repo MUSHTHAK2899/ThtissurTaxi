@@ -75,9 +75,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.thrissurtaxi"
+    namespace "com.quarous.taxi"
     defaultConfig {
-        applicationId "com.thrissurtaxi"
+        applicationId "com.quarous.taxi"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

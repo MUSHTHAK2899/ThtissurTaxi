@@ -1,4 +1,4 @@
-package com.thrissurtaxi;
+package com.quarous.taxi;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

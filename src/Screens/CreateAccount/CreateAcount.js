@@ -35,12 +35,6 @@ const CreateAcount = ({navigation}) => {
   const HandleClick = async () => {
     toast.hideAll()
     setLoading(true);
-    if (!email || !password || !code ||  !phone || !conformPassword || !name) {
-      setLoading(false);
-      toast.show("The some fields are required",{
-        type:'danger',
-      });
-    } else {
       const res = await Api.Register({
         driver_code:code,
         name:name,
@@ -51,29 +45,28 @@ const CreateAcount = ({navigation}) => {
 
       }).catch(err => {
         setLoading(false);
-        console.log(err);
+        // console.log(err);
         toast.show( `${err?.message}`,{
           type:'danger',
         });
       });
       if (res.data && res.data.status == 200) {
         setLoading(false);
-        console.log('login res', res?.data);
+        // console.log('login res', res?.data);
         AsyncStorage.setItem('userAccessToken', res?.data?.data?.user_data?.token);
         AsyncStorage.setItem('userDetails', JSON.stringify(res?.data?.data?.user_data));
         toast.show( `${res.data?.message}`,{
           type:'success',
         });
         navigation.navigate('Otp', {Data:res?.data?.data?.user_data});
-        console.log('tokon', res?.data?.data?.user_data?.token);
+        // console.log('tokon', res?.data?.data?.user_data?.token);
       } else {
         setLoading(false);
-        console.log('login res 2', res.data);
+        // console.log('login res 2', res.data);
         toast.show( `${res.data?.message}`,{
           type:'warning',
         });
-      }
-    }
+      } 
   };
 
   return (
