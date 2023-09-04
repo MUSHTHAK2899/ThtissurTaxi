@@ -61,7 +61,7 @@ const OnBord = ({navigation}) => {
               textAlign: 'center',
               marginTop: Display.setHeight(2),
             }}>
-          Keep track of the details of your trip
+          Keep track the details of your trip
           </Text>
           <TouchableOpacity
             onPress={() => navigation.navigate('Login')}

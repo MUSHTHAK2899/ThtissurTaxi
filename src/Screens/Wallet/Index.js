@@ -249,7 +249,7 @@ const Drivers = ({navigation, route}) => {
                   fontFamily: FONTS.FontRobotoRegular,
                   fontSize: 13,
                 }}>
-                <Text style={{color: 'black'}}>Tips Amount</Text> : ₹
+                <Text style={{color: 'black'}}>Trip Amount</Text> : ₹
                 {WalletSummary?.trips_amount}
               </Text>
               <Text

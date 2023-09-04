@@ -32,7 +32,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {Image} from 'react-native-elements';
 import {useIsFocused} from '@react-navigation/native';
 import AddDriverModal from '../../Componets/AddDriverModal';
-
+import {format} from 'date-fns';
 const Drivers = ({navigation}) => {
   const toast = useToast();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -54,7 +54,7 @@ const Drivers = ({navigation}) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([
-    {label: 'verified', value: 1},
+    {label: 'Verified', value: 1},
     {label: 'Not Verified', value: 0},
   ]);
   const [open1, setOpen1] = useState(false);
@@ -80,7 +80,7 @@ const Drivers = ({navigation}) => {
     });
     if (res.data && res.data.status == 200) {
       setIsLoading(false);
-      // console.log('GetDrivers res', res);
+      console.log('GetDrivers res', res);
       setDriversList(res?.data?.data?.drivers);
       setTotalPages(res?.data?.data?.meta?.total_pages);
     } else {
@@ -97,7 +97,7 @@ const Drivers = ({navigation}) => {
     });
     if (res.data && res.data.status == 200) {
       setIsLoading(false);
-      // console.log('GetDrivers res', res);
+      console.log('GetDrivers res', res);
       setDriversList(prevData => [...prevData, ...res?.data?.data?.drivers]);
       setTotalPages(res?.data?.data?.meta?.total_pages);
     } else {
@@ -374,7 +374,7 @@ const Drivers = ({navigation}) => {
                     fontSize: 12,
                     fontFamily: FONTS.FontRobotoRegular,
                   }}>
-                  Joined On : {item?.joined_on}
+                  Joined On : {format(new Date(item?.joined_on),'d-MM-yyyy').concat(' ',format(new Date(item?.joined_on),'hh:mm a'))}
                 </Text>
                 <Text
                   style={{

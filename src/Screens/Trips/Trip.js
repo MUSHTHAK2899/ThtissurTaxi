@@ -121,11 +121,11 @@ const Trip = ({navigation}) => {
     });
     if (res.data && res.data.status == 200) {
       setIsLoading(false);
-      // console.log('GetTrips res', res);
+      console.log('GetTrips res', res);
       setUserTripData(res?.data?.data?.trips);
       setTotalPages(res?.data?.data?.meta?.total_pages);
     } else {
-      // console.log('GetTrips res 2', res);
+      console.log('GetTrips res 2', res);
       setIsLoading(false);
     }
   };
@@ -137,11 +137,11 @@ const Trip = ({navigation}) => {
     });
     if (res.data && res.data.status == 200) {
       setIsLoading(false);
-      // console.log('GetTrips res', res);
+      console.log('GetTrips res', res);
       setUserTripData(prevData => [...prevData, ...res?.data?.data?.trips]);
       setTotalPages(res?.data?.data?.meta?.total_pages);
     } else {
-      // console.log('GetTrips res 2', res);
+      console.log('GetTrips res 2', res);
       setIsLoading(false);
     }
   };
@@ -321,26 +321,49 @@ const Trip = ({navigation}) => {
               }}>
               {item?.pick_up_drop_text}
             </Text>
-            <View style={{flexDirection: 'row', gap: 20}}>
+            {item?.driver_bata > 0 && (
               <Text
                 style={{
-                  color: '#FFBF00',
-                  fontSize: 17,
-                  fontFamily: FONTS.FontRobotoBold,
-                  marginVertical: 4,
+                  color: 'black',
+                  fontSize: 16,
+                  fontFamily: FONTS.FontRobotoRegular,
+                  marginVertical: 1,
                 }}>
-                Total Amount: ₹ {item?.total_amount}
+                Driver Bata: ₹ {item?.driver_bata}
               </Text>
-              {/* <Text
+            )}
+            {item?.night_halt_amount > 0 && (
+              <Text
                 style={{
-                  color: '#2F9B41',
-                  fontSize: 17,
-                  fontFamily: FONTS.FontRobotoBold,
-                  marginVertical: 4,
+                  color: 'black',
+                  fontSize: 16,
+                  fontFamily: FONTS.FontRobotoRegular,
+                  marginVertical: 1,
                 }}>
-                ₹ {item?.night_halt_amount}
-              </Text> */}
-            </View>
+                Night Halt Amount : ₹ {item?.night_halt_amount}
+              </Text>
+            )}
+            {item?.other_expense_name && (
+              <Text
+                style={{
+                  color: 'black',
+                  fontSize: 16,
+                  fontFamily: FONTS.FontRobotoRegular,
+                }}>
+                {item?.other_expense_name} : ₹ {item?.other_expense_amount}
+              </Text>
+            )}
+            {/* <View style={{flexDirection: 'row', gap: 20}}> */}
+            <Text
+              style={{
+                color: '#FFBF00',
+                fontSize: 17,
+                fontFamily: FONTS.FontRobotoBold,
+                marginVertical: 4,
+              }}>
+              Total Bata : ₹ {item?.total_amount}
+            </Text>
+
             {userLoginData?.user_type == 'DriverAdmin' && (
               <View
                 style={{
@@ -357,10 +380,10 @@ const Trip = ({navigation}) => {
                   onPress={() =>
                     navigation.navigate('PreviewTrip', {
                       userTripData: item,
-                      handleShareText: () =>
-                        handleShareText(item?.share_button_text),
-                      HanldeDwonload: () =>
-                        HanldeDwonload(item?.download_button_link),
+                      // handleShareText: () =>
+                      //   handleShareText(item?.share_button_text),
+                      // HanldeDwonload: () =>
+                      //   HanldeDwonload(item?.download_button_link),
                     })
                   }>
                   <MaterialIcons name={'eye'} color={'white'} size={25} />
@@ -379,7 +402,9 @@ const Trip = ({navigation}) => {
                       color={'white'}
                       size={25}
                       // onPress={() => HanldeDwonload(item?.download_button_link)}
-                      onPress={() => Linking.openURL(item?.download_button_link)}
+                      onPress={() =>
+                        Linking.openURL(item?.download_button_link)
+                      }
                     />
                   </TouchableOpacity>
                 )}
@@ -445,7 +470,7 @@ const Trip = ({navigation}) => {
             marginTop: 20,
           }}>
           <FlatList
-          ref={scrollViewRef}
+            ref={scrollViewRef}
             showsVerticalScrollIndicator={false}
             data={userTripData}
             ListEmptyComponent={ListEmpty}

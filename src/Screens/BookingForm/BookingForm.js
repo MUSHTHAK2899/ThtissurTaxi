@@ -27,12 +27,14 @@ import LoadingMoadal from '../../Componets/LoadingMoadal';
 import Drive from '../Drive/Drive';
 import SignatureCapture from 'react-native-signature-capture';
 import Modal from 'react-native-modal';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import Entypo from 'react-native-vector-icons/Entypo';
 
 const BookingForm = ({navigation}) => {
   const toast = useToast();
   const [tripId, setTripId] = useState();
   const [DriverName, setDriverName] = useState('');
-  const [checked, setChecked] = useState('');
+  const [checked, setChecked] = useState('first');
   const [VehicleNumber, setVehicleNumber] = useState('');
   const [ClientName, setClientName] = useState('');
   const [CompanyName, setCompanyName] = useState('');
@@ -50,6 +52,8 @@ const BookingForm = ({navigation}) => {
   const [DieselKm, setDieselKm] = useState('');
   const [otherExpenseName, setOtherExpenseName] = useState('');
   const [otherExpenseAmount, setOtherExpenseAmount] = useState('');
+  const [customerAmount, setCustomerAmount] = useState('');
+  const [signatureStatus, setSignatureStatus] = useState();
 
   // start garage time
   const [startGrageDate, setstartGrageDate] = useState(new Date());
@@ -167,6 +171,8 @@ const BookingForm = ({navigation}) => {
   useEffect(() => {
     setDriverName(TripData?.driver_name);
     setTripId(TripData?.trip_id);
+    setSignatureStatus(TripData?.customer_signature_status)
+    setChecked('first');
   }, [TripData]);
 
   const GrageStartTime = format(startGrageDate, 'yyyy-MM-dd').concat(
@@ -211,6 +217,7 @@ const BookingForm = ({navigation}) => {
     diesel_km: DieselKm,
     other_expense_name: otherExpenseName,
     other_expense_amount: +otherExpenseAmount,
+    customer_amount: customerAmount,
   };
 
   const HandleEndTrip = async () => {
@@ -248,6 +255,7 @@ const BookingForm = ({navigation}) => {
       setPerimitTollParkingAmount('');
       setDieselAmount('');
       setDieselKm('');
+      setCustomerAmount('');
       setLoading(false);
       // console.log('UpdateTrip res', res);
       setTripData(res.data?.data?.trip_data);
@@ -344,6 +352,7 @@ const BookingForm = ({navigation}) => {
       setPerimitTollParkingAmount('');
       setDieselAmount('');
       setDieselKm('');
+      setCustomerAmount('');
       setLoading(false);
       // console.log('HandleCancelTrip res', res);
       AsyncStorage.setItem(
@@ -415,7 +424,7 @@ const BookingForm = ({navigation}) => {
     if (res.data && res.data.status == 200) {
       setButtonShowStatus(res.data?.data?.show_start_trip_button);
       setLoading(false);
-      // console.log('login res', res);
+      console.log('HandleStartTrip res', res);
       AsyncStorage.setItem(
         'TripDetails',
         JSON.stringify(res.data?.data?.trip_data),
@@ -426,7 +435,7 @@ const BookingForm = ({navigation}) => {
       });
     } else {
       setLoading(false);
-      // console.log('login res 2', res.data);
+      console.log('HandleStartTrip res 2', res.data);
       toast.show(`${res.data?.message}`, {
         type: 'warning',
       });
@@ -436,7 +445,7 @@ const BookingForm = ({navigation}) => {
   const signatureRef = useRef(null);
 
   const handleSave = () => {
-    console.log("hai")
+    console.log('hai');
     if (signatureRef.current) {
       signatureRef.current.saveImage();
     }
@@ -448,7 +457,7 @@ const BookingForm = ({navigation}) => {
     }
   };
 
-  const handleSaveEvent =async ( result) => {
+  const handleSaveEvent = async result => {
     // Handle the signature data from result.encoded
     console.log('Signature saved:', result.encoded);
     SetSignaturePadShow(false);
@@ -456,7 +465,7 @@ const BookingForm = ({navigation}) => {
     setLoading(true);
     const res = await Api.UpdateCustomerSignature({
       trip_id: TripData?.trip_id,
-      signature:String(result.encoded)
+      signature: String(result.encoded),
     }).catch(err => {
       setLoading(false);
       // console.log(err);
@@ -465,8 +474,9 @@ const BookingForm = ({navigation}) => {
       });
     });
     if (res.data && res.data.status == 200) {
+      setSignatureStatus(1)
       setLoading(false);
-      console.log('UpdateCustomerSignature res',res );
+      console.log('UpdateCustomerSignature res', res);
       // navigation.navigate('Home');
       toast.show(`${res.data?.message}`, {
         type: 'success',
@@ -885,9 +895,46 @@ const BookingForm = ({navigation}) => {
                     onChangeText={text => setOtherExpenseAmount(text)}
                     keyboardType="number-pad"
                   />
-                <TouchableOpacity style={{marginTop:20,backgroundColor:'#155e75',width:180,paddingVertical:10,borderRadius:20}} onPress={() => SetSignaturePadShow(true)}>
-                  <Text style={{color: 'white',textAlign:'center',fontFamily:FONTS.FontRobotoBold}}>customer Signature Pad</Text>
-                </TouchableOpacity>
+                  <TextInput
+                    label="Customer Amount"
+                    value={customerAmount}
+                    style={styles.valueText}
+                    activeOutlineColor={'black'}
+                    mode="outlined"
+                    outlineColor={'black'}
+                    onChangeText={text => setCustomerAmount(text)}
+                    keyboardType="number-pad"
+                  />
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginTop: 20,
+                      gap: 7,
+                    }}>
+                    <TouchableOpacity
+                      style={{
+                        backgroundColor: '#155e75',
+                        width: 180,
+                        paddingVertical: 10,
+                        borderRadius: 20,
+                      }}
+                      onPress={() => SetSignaturePadShow(true)}>
+                      <Text
+                        style={{
+                          color: 'white',
+                          textAlign: 'center',
+                          fontFamily: FONTS.FontRobotoBold,
+                        }}>
+                        Customer Signature Pad{' '}
+                      </Text>
+                    </TouchableOpacity>
+                    {
+                      signatureStatus==1?
+                    <AntDesign name={'checkcircle'} color={'green'} size={25} />: 
+                    <Entypo name={'circle-with-cross'} color={'#ef4444'} size={25} />
+                    }
+                  </View>
                 </View>
                 {signaturePadShow && (
                   <Modal
@@ -902,8 +949,8 @@ const BookingForm = ({navigation}) => {
                         ref={signatureRef}
                         onSaveEvent={handleSaveEvent}
                         saveImageFileInExtStorage={false}
-                        showNativeButtons={false} 
-                        showTitleLabel={true} 
+                        showNativeButtons={false}
+                        showTitleLabel={true}
                         viewMode={'portrait'}
                       />
                       <View
@@ -948,11 +995,11 @@ const BookingForm = ({navigation}) => {
               }}>
               <TouchableOpacity
                 onPress={HandleUpdateTrip}
-                style={[styles.buttonView, {backgroundColor: '#28a745'}]}>
+                style={styles.buttonView}>
                 <Text style={styles.buttonText}>Update Trip</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.buttonView}
+                style={[styles.buttonView, {backgroundColor: '#28a745'}]}
                 onPress={HandleEndTrip}>
                 <Text style={styles.buttonText}>End Trip</Text>
               </TouchableOpacity>

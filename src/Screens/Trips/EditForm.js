@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Button,
   BackHandler,
-  ScrollView
+  ScrollView,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
@@ -68,8 +68,12 @@ const EditForm = ({navigation, route}) => {
   const [DriverBataPerKM, setDriverBataPerKM] = useState(
     String(item?.driver_bata),
   );
-  const [otherExpenseName, setOtherExpenseName] = useState(item?.other_expense_name);
-  const [otherExpenseAmount, setOtherExpenseAmount] = useState(String(item?.other_expense_amount));
+  const [otherExpenseName, setOtherExpenseName] = useState(
+    item?.other_expense_name,
+  );
+  const [otherExpenseAmount, setOtherExpenseAmount] = useState(
+    String(item?.other_expense_amount),
+  );
   // start garage time
   const [startGrageDate, setstartGrageDate] = useState(
     new Date(item?.garage_start_time),
@@ -108,8 +112,99 @@ const EditForm = ({navigation, route}) => {
   const [showEndTimeDropPoint, setshowEndTimeDropPoint] = useState(false);
   const [tripDate, setTripDate] = useState(new Date(item?.trip_date));
   const [showTripDate, setshowtripDate] = useState(false);
+  const [customerAmount, setCustomerAmount] = useState(
+    String(item?.customer_amount),
+  );
+  const [GarageTotalKm, setGarageTotalKm] = useState(item?.garage_total_km);
+  const [PickUpDropTotalKm, setPickUpDropTotalKm] = useState(
+    item?.pick_up_drop_total_km,
+  );
+
+  const [GarageTotalTimeHours, setGarageTotalTimeHours] = useState();
+  const [GarageTotalTimeMinute, setGarageTotalTimeMinute] = useState();
+  const [PickUpDropTotalTimeHours, setPickUpDropTotalTimeHours] = useState();
+  const [PickUpDropTotalTimeMinute, setPickUpDropTotalTimeMinute] = useState();
   //api----
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (+StartingKMGarage < +EndKMGarage) {
+      setGarageTotalKm(+EndKMGarage - +StartingKMGarage);
+    } else {
+      setGarageTotalKm(+StartingKMGarage - +EndKMGarage);
+    }
+  }, [StartingKMGarage, EndKMGarage]);
+
+  useEffect(() => {
+    if (+StartingKMPickupPoint < +EndingKMPickupPoint) {
+      setPickUpDropTotalKm(+EndingKMPickupPoint - +StartingKMPickupPoint);
+    } else {
+      setPickUpDropTotalKm(+StartingKMPickupPoint - +EndingKMPickupPoint);
+    }
+  }, [StartingKMPickupPoint, EndingKMPickupPoint]);
+
+  useEffect(() => {
+    const GrageStartTimeNew = format(startGrageDate, 'yyyy-MM-dd').concat(
+      ' ',
+      format(startGrageTime, 'HH:mm:ss'),
+    );
+    const GarageEndTimeNew = format(endGrageDate, 'yyyy-MM-dd').concat(
+      ' ',
+      format(endGrageTime, 'HH:mm:ss'),
+    );
+    const startTime = new Date(GrageStartTimeNew);
+    const endTime = new Date(GarageEndTimeNew);
+    const timeDifferenceInMilliseconds = endTime - startTime;
+
+    // Convert milliseconds to hours, minutes, and seconds
+    const hours = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60));
+    const minutes = Math.floor(
+      (timeDifferenceInMilliseconds % (1000 * 60 * 60)) / (1000 * 60),
+    );
+    const seconds = Math.floor(
+      (timeDifferenceInMilliseconds % (1000 * 60)) / 1000,
+    );
+    setGarageTotalTimeHours(hours);
+    setGarageTotalTimeMinute(minutes);
+  }, [startGrageDate, startGrageTime, endGrageDate, endGrageTime]);
+
+  useEffect(() => {
+    if (+StartingKMPickupPoint < +EndingKMPickupPoint) {
+      setPickUpDropTotalKm(+EndingKMPickupPoint - +StartingKMPickupPoint);
+    } else {
+      setPickUpDropTotalKm(+StartingKMPickupPoint - +EndingKMPickupPoint);
+    }
+  }, [StartingKMPickupPoint, EndingKMPickupPoint]);
+
+  useEffect(() => {
+    const PickUpStartTime = format(startDatePickupPoint, 'yyyy-MM-dd').concat(
+      ' ',
+      format(startTimePickupPoint, 'HH:mm:ss'),
+    );
+    const DropEndTime = format(endDateDropPoint, 'yyyy-MM-dd').concat(
+      ' ',
+      format(endTimeDropPoint, 'HH:mm:ss'),
+    );
+    const startTime = new Date(PickUpStartTime);
+    const endTime = new Date(DropEndTime);
+    const timeDifferenceInMilliseconds = endTime - startTime;
+
+    // Convert milliseconds to hours, minutes, and seconds
+    const hours = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60));
+    const minutes = Math.floor(
+      (timeDifferenceInMilliseconds % (1000 * 60 * 60)) / (1000 * 60),
+    );
+    const seconds = Math.floor(
+      (timeDifferenceInMilliseconds % (1000 * 60)) / 1000,
+    );
+    setPickUpDropTotalTimeHours(hours);
+    setPickUpDropTotalTimeMinute(seconds);
+  }, [
+    startDatePickupPoint,
+    startTimePickupPoint,
+    endDateDropPoint,
+    endTimeDropPoint,
+  ]);
 
   const handleTripDate = (event, date) => {
     if (event.type == 'set') {
@@ -253,41 +348,44 @@ const EditForm = ({navigation, route}) => {
     diesel_amount: +DieselAmount,
     diesel_km: +DieselKm,
     driver_bata: +DriverBataPerKM,
-    other_expense_name:otherExpenseName,
-    other_expense_amount:+otherExpenseAmount
+    other_expense_name: otherExpenseName,
+    other_expense_amount: +otherExpenseAmount,
+    customer_amount: customerAmount,
   };
 
   const HandleApprove = async () => {
     setLoading(true);
-      const res = await Api.ApproveTrip(Data).catch(err => {
-        setLoading(false);
-        // console.log(err);
-        toast.show(`${err?.message}`, {
-          type: 'danger',
-        });
+    const res = await Api.ApproveTrip(Data).catch(err => {
+      setLoading(false);
+      // console.log(err);
+      toast.show(`${err?.message}`, {
+        type: 'danger',
       });
-      if (res.data && res.data.status == 200) {
-        navigation.navigate('My Trips');
-        setLoading(false);
-        // console.log('UpdateTrip res', res);
-        AsyncStorage.setItem(
-          'TripDetails',
-          JSON.stringify(res.data?.data?.trip_data),
-        );
-        AsyncStorage.setItem(
-          'TripSatus',
-          JSON.stringify(res.data?.data?.trip_data),
-        );
-        toast.show(`${res.data?.message}`, {
-          type: 'success',
-        });
-      } else {
-        setLoading(false);
-        // console.log('UpdateTrip res 2', res);
-        toast.show(`${res.data?.message}`, {
-          type: 'warning',
-        });
-      }
+    });
+    if (res.data && res.data.status == 200) {
+      navigation.replace('PreviewTrip', {
+        userTripData: res.data?.data?.trip_data,
+      });
+      setLoading(false);
+      // console.log('UpdateTrip res', res);
+      AsyncStorage.setItem(
+        'TripDetails',
+        JSON.stringify(res.data?.data?.trip_data),
+      );
+      AsyncStorage.setItem(
+        'TripSatus',
+        JSON.stringify(res.data?.data?.trip_data),
+      );
+      toast.show(`${res.data?.message}`, {
+        type: 'success',
+      });
+    } else {
+      setLoading(false);
+      // console.log('UpdateTrip res 2', res);
+      toast.show(`${res.data?.message}`, {
+        type: 'warning',
+      });
+    }
   };
 
   return (
@@ -677,17 +775,6 @@ const EditForm = ({navigation, route}) => {
                   keyboardType="ascii-capable"
                 />
                 <TextInput
-                  label="Night Halt Amount"
-                  value={NightHalfAmount}
-                  style={styles.valueText}
-                  activeOutlineColor={'black'}
-                  mode="outlined"
-                  outlineColor={'black'}
-                  onChangeText={text => setNightHalfAmount(text)}
-                  keyboardType="ascii-capable"
-                />
-
-                <TextInput
                   label="Perimit,Toll & Parking Amount"
                   value={PerimitTollParkingAmount}
                   style={styles.valueText}
@@ -720,6 +807,42 @@ const EditForm = ({navigation, route}) => {
                     keyboardType="number-pad"
                   />
                 </View>
+                <View style={{marginTop: 8}}>
+                  <Text style={styles.TextFiled}>
+                    Garage Total Km : {GarageTotalKm} KM
+                  </Text>
+                  <Text style={styles.TextFiled}>
+                    Garage Total Time : {GarageTotalTimeHours} Hours{' '}
+                    {GarageTotalTimeMinute} Minutes
+                  </Text>
+                  <Text style={styles.TextFiled}>
+                    Pick Up Drop Total Km : {PickUpDropTotalKm} KM
+                  </Text>
+                  <Text style={styles.TextFiled}>
+                    Pick Up Drop Total Time : {PickUpDropTotalTimeHours} Hours{' '}
+                    {PickUpDropTotalTimeMinute} Minutes
+                  </Text>
+                </View>
+                <TextInput
+                  label="Other Expense Name"
+                  value={otherExpenseName}
+                  style={styles.valueText}
+                  activeOutlineColor={'black'}
+                  mode="outlined"
+                  outlineColor={'black'}
+                  onChangeText={text => setOtherExpenseName(text)}
+                  keyboardType="ascii-capable"
+                />
+                <TextInput
+                  label="Other Expense Amount"
+                  value={otherExpenseAmount}
+                  style={styles.valueText}
+                  activeOutlineColor={'black'}
+                  mode="outlined"
+                  outlineColor={'black'}
+                  onChangeText={text => setOtherExpenseAmount(text)}
+                  keyboardType="number-pad"
+                />
                 <TextInput
                   label="Driver Bata"
                   value={DriverBataPerKM}
@@ -730,26 +853,26 @@ const EditForm = ({navigation, route}) => {
                   onChangeText={text => setDriverBataPerKM(text)}
                   keyboardType="number-pad"
                 />
-                    <TextInput
-                    label="Other Expense Name"
-                    value={otherExpenseName}
-                    style={styles.valueText}
-                    activeOutlineColor={'black'}
-                    mode="outlined"
-                    outlineColor={'black'}
-                    onChangeText={text => setOtherExpenseName(text)}
-                    keyboardType="ascii-capable"
-                  />
-                  <TextInput
-                    label="Other Expense Amount"
-                    value={otherExpenseAmount}
-                    style={styles.valueText}
-                    activeOutlineColor={'black'}
-                    mode="outlined"
-                    outlineColor={'black'}
-                    onChangeText={text => setOtherExpenseAmount(text)}
-                    keyboardType="number-pad"
-                  />
+                <TextInput
+                  label="Night Halt Amount"
+                  value={NightHalfAmount}
+                  style={styles.valueText}
+                  activeOutlineColor={'black'}
+                  mode="outlined"
+                  outlineColor={'black'}
+                  onChangeText={text => setNightHalfAmount(text)}
+                  keyboardType="ascii-capable"
+                />
+                <TextInput
+                  label="Customer Amount"
+                  value={customerAmount}
+                  style={styles.valueText}
+                  activeOutlineColor={'black'}
+                  mode="outlined"
+                  outlineColor={'black'}
+                  onChangeText={text => setCustomerAmount(text)}
+                  keyboardType="number-pad"
+                />
               </View>
             </ScrollView>
           </View>
@@ -814,5 +937,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'white',
     textTransform: 'capitalize',
+  },
+  TextFiled: {
+    color: '#082f49',
+    fontFamily: FONTS.FontRobotoMedium,
+    fontSize: 14,
+    marginBottom: 5,
   },
 });
