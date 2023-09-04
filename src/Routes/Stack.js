@@ -7,6 +7,7 @@ import Home from '../Screens/Home/Home';
 import Login from '../Screens/Login/Login';
 import OnBord from '../Screens/OnBordScreen/OnBord';
 import BottomTab from './BottomTab';
+import BookingForm from '../Screens/BookingForm/BookingForm';
 
 const Stack = createStackNavigator();
 
@@ -20,6 +21,7 @@ const StackNavigation = () => {
     <Stack.Screen name="Login" component={Login} />
     <Stack.Screen name="OnBord" component={OnBord} />
     <Stack.Screen name="Home" component={BottomTab} />
+    <Stack.Screen name="BookingForm" component={BookingForm} />
    
   </Stack.Navigator>
     </NavigationContainer>

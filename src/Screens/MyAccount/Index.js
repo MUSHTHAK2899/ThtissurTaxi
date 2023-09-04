@@ -8,7 +8,7 @@ const Account = () => {
     <SafeAreaView style={styles.safeAreaContainer} />
     <StatusBar
       translucent
-      backgroundColor={'black'}
+      backgroundColor={'#FFBF00'}
       barStyle={'light-content'}
     />
   <View style={{flex:1,backgroundColor:'white'}}>
