@@ -172,16 +172,6 @@ const Account = ({navigation}) => {
     }
   };
   return (
-<<<<<<< HEAD
-    <SafeAreaProvider style={{backgroundColor: '#F4F4F4'}}>
-    <SafeAreaView style={styles.safeAreaContainer} />
-    <StatusBar
-      translucent
-      backgroundColor={'#FFBF00'}
-      barStyle={'light-content'}
-    />
-  <View style={{flex:1,backgroundColor:'white'}}>
-=======
     <>
       <SafeAreaProvider style={{backgroundColor: '#fefce8'}}>
         <SafeAreaView style={styles.safeAreaContainer} />
@@ -225,7 +215,6 @@ const Account = ({navigation}) => {
                 source={{uri: userLoginData?.profile_image_original}}
               />
             </TouchableOpacity>
->>>>>>> 17f6a46929cbd805c6990ea179c2a2438be8a5ec
 
             <TouchableOpacity onPress={HandleImage}>
               <Text style={styles.changeImageText}>CHANGE IMAGE</Text>

@@ -31,6 +31,7 @@ import {useToast} from 'react-native-toast-notifications';
 import RNFetchBlob from 'rn-fetch-blob';
 import {format} from 'date-fns';
 import Toast from 'react-native-root-toast';
+import FilterTripsModal from '../../Componets/FilterTripsModal';
 
 const Trip = ({navigation}) => {
   const scrollViewRef = useRef(null);
@@ -41,7 +42,30 @@ const Trip = ({navigation}) => {
   const [totalPages, setTotalPages] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoading2, setIsLoading2] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
+  const [vehiclesNumberSuggessions, setVehiclesNumberSuggessions] = useState(
+    [],
+  );
+  const [companySuggessions, setCompanySuggessions] = useState([]);
+  const [isFiltterModalOpen, setFiltterModalOpen] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const [FilterFromDate, setFilterFromDate] = useState(new Date());
+  const [showPickerToDate, setShowPickerTodate] = useState(false);
+  const [FilterToDate, setFilterTODate] = useState(new Date());
+  const [companyList, setCompanyList] = useState([]);
+  const [VehicleNumberList, setVehicleNumbeList] = useState([]);
+  const [driversList, setDriversList] = useState([]);
+  const [cashOrCreditList, setCashOrCreditList] = useState([]);
+  const [openCompanyList, setOpenCompanyList] = useState(false);
+  const [valueCompanyList, setValueCompanyList] = useState(null);
+  const [openVehicleNumberList, setOpenVehicleNumberList] = useState(false);
+  const [valueVehicleNumberList, setValueVehicleNumberList] = useState(null);
+  const [openDriversList, setOpenDriversList] = useState(false);
+  const [valueDriversList, setValueDriversList] = useState(null);
+  const [openCashOrCreditList, setOpenCashOrCreditList] = useState(false);
+  const [valueCashOrCreditList, setValueCashOrCreditList] = useState(null);
+  const [PlaceOrClient, setPlaceorClient] = useState('');
 
   const handleShareText = async text => {
     try {
@@ -123,6 +147,8 @@ const Trip = ({navigation}) => {
       setIsLoading(false);
       console.log('GetTrips res', res);
       setUserTripData(res?.data?.data?.trips);
+      setVehiclesNumberSuggessions(res?.data?.data?.vehicles);
+      setCompanySuggessions(res?.data?.data?.companies);
       setTotalPages(res?.data?.data?.meta?.total_pages);
     } else {
       console.log('GetTrips res 2', res);
@@ -255,6 +281,94 @@ const Trip = ({navigation}) => {
     } catch (error) {
       // console.error("error",error);
       return null;
+    }
+  };
+
+  //-------------------------------FIlterModal----------------------------
+  const handleFilterFromDate = (event, date) => {
+    if (event.type == 'set') {
+      setShowPicker(false);
+      if (date) {
+        setFilterFromDate(date);
+        console.log(date);
+      }
+    } else {
+      setShowPicker(false);
+    }
+  };
+  const handleFilterToDate = (event, date) => {
+    if (event.type == 'set') {
+      setShowPickerTodate(false);
+      if (date) {
+        setFilterTODate(date);
+        console.log(date, valueCompanyList, valueVehicleNumberList);
+      }
+    } else {
+      setShowPickerTodate(false);
+    }
+  };
+
+  const GetFilterData = async () => {
+    setIsLoading(true);
+    const res = await Api.GetTripFilterData().catch(err => {
+      setIsLoading(false);
+      console.log(err);
+    });
+    if (res.data && res.data.status == 200) {
+      setIsLoading(false);
+      console.log('GetFilterData', res?.data?.data);
+      setCompanyList(res?.data?.data?.companies);
+      setVehicleNumbeList(res?.data?.data?.vehicles);
+      setDriversList(res?.data?.data?.drivers);
+      setCashOrCreditList(res?.data?.data?.cash_or_credit);
+    } else {
+      console.log('GetTrips res 2', res);
+      setIsLoading(false);
+    }
+  };
+
+  const FromDate = format(FilterFromDate, 'yyyy-MM-dd');
+  const ToDateDate = format(FilterToDate, 'yyyy-MM-dd');
+
+  const HandleFilterModal = async () => {
+    toast.hideAll();
+    setIsLoading2(true);
+    const res = await Api.GetTripsFilter(
+      1,
+      FromDate,
+      ToDateDate,
+      valueCompanyList,
+      valueDriversList,
+      valueVehicleNumberList,
+      PlaceOrClient,
+      valueCashOrCreditList,
+    ).catch(err => {
+      setIsLoading2(false);
+      toast.show(`${err?.message}`, {
+        type: 'danger',
+      });
+      console.log(err);
+    });
+    if (res.data && res.data.status == 200) {
+      setIsLoading2(false);
+      console.log('HandleFilterModal res', res);
+      setUserTripData(res?.data?.data?.trips);
+      setVehiclesNumberSuggessions(res?.data?.data?.vehicles);
+      setCompanySuggessions(res?.data?.data?.companies);
+      setTotalPages(res?.data?.data?.meta?.total_pages);
+      setFiltterModalOpen(false);
+      setValueCompanyList(null)
+      setValueVehicleNumberList(null)
+      setValueDriversList(null)
+      setValueCashOrCreditList(null)
+      setPlaceorClient('')
+    } else {
+      console.log('HandleFilterModal res 2', res?.data?.errors[0]);
+      setIsLoading2(false);
+      setFiltterModalOpen(false);
+      toast.show(`${res?.data?.errors[0]}`, {
+        type: 'danger',
+      });
     }
   };
 
@@ -411,7 +525,13 @@ const Trip = ({navigation}) => {
 
                 <TouchableOpacity
                   style={[styles.buttonView]}
-                  onPress={() => navigation.navigate('EditForm', {item: item})}>
+                  onPress={() =>
+                    navigation.navigate('EditForm', {
+                      item: item,
+                      vehiclesNumber: vehiclesNumberSuggessions,
+                      companyName: companySuggessions,
+                    })
+                  }>
                   <FontAwesome name={'edit'} color={'white'} size={25} />
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -469,6 +589,21 @@ const Trip = ({navigation}) => {
             backgroundColor: '#fefce8',
             marginTop: 20,
           }}>
+          {userLoginData?.user_type == 'DriverAdmin' && (
+            <MaterialCommunityIcons
+              onPress={() => {
+                setFiltterModalOpen(true), GetFilterData();
+              }}
+              style={{
+                textAlign: 'right',
+                marginHorizontal: 20,
+                marginBottom: 9,
+              }}
+              name={'filter-variant'}
+              color={'black'}
+              size={30}
+            />
+          )}
           <FlatList
             ref={scrollViewRef}
             showsVerticalScrollIndicator={false}
@@ -498,6 +633,43 @@ const Trip = ({navigation}) => {
           hideOnPress={true}>
           Dwonloading...
         </Toast>
+        <FilterTripsModal
+          isVisible={isFiltterModalOpen}
+          onBackdropPress={() => setFiltterModalOpen(false)}
+          onclose={isFiltterModalOpen}
+          loading={isLoading2}
+          handleFilterFromDate={handleFilterFromDate}
+          setShowPicker={setShowPicker}
+          showPicker={showPicker}
+          FilterFromDate={FilterFromDate}
+          handleFilterToDate={handleFilterToDate}
+          showPickerToDate={showPickerToDate}
+          setShowPickerTodate={setShowPickerTodate}
+          FilterToDate={FilterToDate}
+          setOpenCompanyList={setOpenCompanyList}
+          openCompanyList={openCompanyList}
+          setValueCompanyList={setValueCompanyList}
+          valueCompanyList={valueCompanyList}
+          companyList={companyList}
+          VehicleNumberList={VehicleNumberList}
+          setOpenVehicleNumberList={setOpenVehicleNumberList}
+          openVehicleNumberList={openVehicleNumberList}
+          setValueVehicleNumberList={setValueVehicleNumberList}
+          valueVehicleNumberList={valueVehicleNumberList}
+          driversList={driversList}
+          setOpenDriversList={setOpenDriversList}
+          openDriversList={openDriversList}
+          setValueDriversList={setValueDriversList}
+          valueDriversList={valueDriversList}
+          cashOrCreditList={cashOrCreditList}
+          setOpenCashOrCreditList={setOpenCashOrCreditList}
+          openCashOrCreditList={openCashOrCreditList}
+          setValueCashOrCreditList={setValueCashOrCreditList}
+          valueCashOrCreditList={valueCashOrCreditList}
+          setPlaceorClient={setPlaceorClient}
+          PlaceOrClient={PlaceOrClient}
+          HandleFilterModal={HandleFilterModal}
+        />
       </SafeAreaProvider>
     </>
   );

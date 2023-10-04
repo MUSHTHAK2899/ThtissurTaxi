@@ -10,15 +10,11 @@
     "test": "jest"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "@react-native-community/datetimepicker": "^7.4.0",
-=======
     "@react-native-async-storage/async-storage": "^1.19.1",
     "@react-native-clipboard/clipboard": "^1.11.2",
     "@react-native-community/datetimepicker": "^7.4.0",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-community/netinfo": "^9.4.1",
->>>>>>> 17f6a46929cbd805c6990ea179c2a2438be8a5ec
     "@react-navigation/bottom-tabs": "^6.5.8",
     "@react-navigation/drawer": "^6.6.3",
     "@react-navigation/material-top-tabs": "^6.6.3",

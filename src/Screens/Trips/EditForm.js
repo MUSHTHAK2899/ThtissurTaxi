@@ -4,19 +4,17 @@ import {
   View,
   SafeAreaView,
   StatusBar,
-  Image,
   TouchableOpacity,
   KeyboardAvoidingView,
-  Button,
-  BackHandler,
   ScrollView,
+  FlatList,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import Display from '../../utils/Display';
 import {FONTS} from '../../Constants/Constants';
 import Hedder from '../../Componets/Hedder';
-import {TextInput, RadioButton} from 'react-native-paper';
+import {TextInput, RadioButton, Checkbox} from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import DropDown from '../../Componets/DropDwon';
 import {format} from 'date-fns';
@@ -27,7 +25,9 @@ import LoadingMoadal from '../../Componets/LoadingMoadal';
 
 const EditForm = ({navigation, route}) => {
   const toast = useToast();
-  const {item} = route.params;
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [checkedNightHalt, setCheckedNightHalt] = useState(true);
+  const {item, vehiclesNumber, companyName} = route.params;
   const [tripId, setTripId] = useState(item?.trip_id);
   const [NightHalfAmount, setNightHalfAmount] = useState(
     String(item?.night_halt_amount),
@@ -35,6 +35,9 @@ const EditForm = ({navigation, route}) => {
   const [DriverName, setDriverName] = useState(item?.driver_name);
   const [checked, setChecked] = useState(
     item?.vehicle_type == 'Ac' ? 'first' : 'second',
+  );
+  const [checkedBoxCash_credit, setCheckedBoxCash_credit] = useState(
+    item?.cash_or_credit == 'Cash' ? 'first' : 'second',
   );
   const [VehicleNumber, setVehicleNumber] = useState(item?.vehicle_number);
   const [ClientName, setClientName] = useState(item?.client_name);
@@ -74,6 +77,10 @@ const EditForm = ({navigation, route}) => {
   const [otherExpenseAmount, setOtherExpenseAmount] = useState(
     String(item?.other_expense_amount),
   );
+  const [cashOrCreditReason, setCashOrCreditReason] = useState(
+    String(item?.cash_or_credit_reason),
+  );
+
   // start garage time
   const [startGrageDate, setstartGrageDate] = useState(
     new Date(item?.garage_start_time),
@@ -205,6 +212,16 @@ const EditForm = ({navigation, route}) => {
     endDateDropPoint,
     endTimeDropPoint,
   ]);
+  const [checkedAmountAddWallet, setCheckedAmountAddWallet] = useState(
+    item?.amount_add_to_wallet == 1 ? true : false,
+  );
+
+  //Suggessions
+  const [showProduct, setShowproduct] = useState(false);
+  const [showcompany, setShowcompany] = useState(false);
+  const [vehiclesNumberSuggessionsList, setVehiclesNumberSuggessionsList] =
+    useState([]);
+  const [companySuggessionsList, setCompanySuggessionsList] = useState([]);
 
   const handleTripDate = (event, date) => {
     if (event.type == 'set') {
@@ -351,6 +368,15 @@ const EditForm = ({navigation, route}) => {
     other_expense_name: otherExpenseName,
     other_expense_amount: +otherExpenseAmount,
     customer_amount: customerAmount,
+    cash_or_credit:
+      checkedBoxCash_credit == 'first'
+        ? 'Cash'
+        : checkedBoxCash_credit == 'second'
+        ? 'Credit'
+        : '',
+    cash_or_credit_reason: cashOrCreditReason,
+    night_halt_not_for_driver: checkedNightHalt ? 1 : 0,
+    amount_add_to_wallet: checkedAmountAddWallet ? 1 : 0,
   };
 
   const HandleApprove = async () => {
@@ -385,6 +411,72 @@ const EditForm = ({navigation, route}) => {
       toast.show(`${res.data?.message}`, {
         type: 'warning',
       });
+    }
+  };
+  //SuggessionsList
+
+  const itemSeparator = () => {
+    return <Text style={styles.separator}></Text>;
+  };
+
+  const renderItem = ({item}) => {
+    return (
+      <>
+        <TouchableOpacity
+          style={{marginHorizontal: 10, marginVertical: 10}}
+          onPress={() => clickedProduct(item)}>
+          <Text style={{color: 'black'}}>{item}</Text>
+        </TouchableOpacity>
+      </>
+    );
+  };
+  const renderItemCompany = ({item}) => {
+    return (
+      <>
+        <TouchableOpacity
+          style={{marginHorizontal: 10, marginVertical: 10}}
+          onPress={() => clickedCompany(item)}>
+          <Text style={{color: 'black'}}>{item}</Text>
+        </TouchableOpacity>
+      </>
+    );
+  };
+
+  const clickedProduct = item => {
+    setVehicleNumber(item);
+    setShowproduct(false);
+  };
+
+  const clickedCompany = item => {
+    setCompanyName(item);
+    setShowcompany(false);
+  };
+
+  const onChangeVehicleNumber = text => {
+    console.log(text);
+    setVehicleNumber(text);
+    const regex = new RegExp(text, 'i');
+    const result = vehiclesNumber.filter(item => regex.test(item));
+    console.log(result);
+    if (result) {
+      setVehiclesNumberSuggessionsList(result);
+      setShowproduct(true);
+    } else {
+      setVehiclesNumberSuggessionsList(null);
+    }
+  };
+
+  const onChangeCompanyName = text => {
+    console.log(text);
+    setCompanyName(text);
+    const regex = new RegExp(text, 'i');
+    const result = companyName.filter(item => regex.test(item));
+    console.log(result);
+    if (result) {
+      setCompanySuggessionsList(result);
+      setShowcompany(true);
+    } else {
+      setCompanySuggessionsList(null);
     }
   };
 
@@ -499,11 +591,30 @@ const EditForm = ({navigation, route}) => {
                   activeOutlineColor={'black'}
                   mode="outlined"
                   outlineColor={'black'}
-                  onChangeText={text => setVehicleNumber(text)}
+                  onChangeText={text => onChangeVehicleNumber(text)}
                   keyboardType="ascii-capable"
                   maxLength={10}
                   autoCapitalize="characters"
+                  right={<TextInput.Icon icon="chevron-down" />}
                 />
+                {showProduct &&
+                  VehicleNumber.length >= 1 &&
+                  vehiclesNumberSuggessionsList.length >= 1 && (
+                    <View
+                      style={{
+                        borderWidth: 1,
+                        borderColor: 'gray',
+                        marginTop: 5,
+                        borderRadius: 5,
+                      }}>
+                      <FlatList
+                        data={vehiclesNumberSuggessionsList}
+                        renderItem={renderItem}
+                        keyExtractor={(item, index) => index}
+                        ItemSeparatorComponent={itemSeparator}
+                      />
+                    </View>
+                  )}
                 <TextInput
                   label="Client Name"
                   value={ClientName}
@@ -521,9 +632,28 @@ const EditForm = ({navigation, route}) => {
                   activeOutlineColor={'black'}
                   mode="outlined"
                   outlineColor={'black'}
-                  onChangeText={text => setCompanyName(text)}
+                  onChangeText={text => onChangeCompanyName(text)}
                   keyboardType="ascii-capable"
+                  right={<TextInput.Icon icon="chevron-down" />}
                 />
+                {showcompany &&
+                  CompanyName.length >= 1 &&
+                  companySuggessionsList.length >= 1 && (
+                    <View
+                      style={{
+                        borderWidth: 1,
+                        borderColor: 'gray',
+                        marginTop: 5,
+                        borderRadius: 5,
+                      }}>
+                      <FlatList
+                        data={companySuggessionsList}
+                        renderItem={renderItemCompany}
+                        keyExtractor={(item, index) => index}
+                        ItemSeparatorComponent={itemSeparator}
+                      />
+                    </View>
+                  )}
                 <View style={{flexDirection: 'row'}}>
                   <TextInput
                     label="Enter Pick Up"
@@ -863,6 +993,22 @@ const EditForm = ({navigation, route}) => {
                   onChangeText={text => setNightHalfAmount(text)}
                   keyboardType="ascii-capable"
                 />
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <Checkbox
+                    status={checkedNightHalt ? 'checked' : 'unchecked'}
+                    onPress={() => {
+                      setCheckedNightHalt(!checkedNightHalt);
+                    }}
+                    color={'#FFBF00'}
+                  />
+                  <Text
+                    style={{
+                      color: 'black',
+                      fontFamily: FONTS.FontRobotoMedium,
+                    }}>
+                    Not For Driver
+                  </Text>
+                </View>
                 <TextInput
                   label="Customer Amount"
                   value={customerAmount}
@@ -872,6 +1018,81 @@ const EditForm = ({navigation, route}) => {
                   outlineColor={'black'}
                   onChangeText={text => setCustomerAmount(text)}
                   keyboardType="number-pad"
+                />
+                <View style={{flexDirection: 'row', marginTop: 5}}>
+                  {/* <Text style={styles.hedderText}>Vehicle Type</Text> */}
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <RadioButton
+                      value="first"
+                      status={
+                        checkedBoxCash_credit === 'first'
+                          ? 'checked'
+                          : 'unchecked'
+                      }
+                      onPress={() => setCheckedBoxCash_credit('first')}
+                      color={'#FFBF00'}
+                    />
+                    <Text
+                      style={{
+                        color: 'black',
+                        fontFamily: FONTS.FontRobotoMedium,
+                        fontSize: 15,
+                      }}>
+                      Cash
+                    </Text>
+                  </View>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <RadioButton
+                      value="second"
+                      status={
+                        checkedBoxCash_credit === 'second'
+                          ? 'checked'
+                          : 'unchecked'
+                      }
+                      onPress={() => setCheckedBoxCash_credit('second')}
+                      color={'#FFBF00'}
+                    />
+                    <Text
+                      style={{
+                        color: 'black',
+                        fontFamily: FONTS.FontRobotoMedium,
+                        fontSize: 15,
+                      }}>
+                      Credit
+                    </Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={{flexDirection: 'row', alignItems: 'center'}}
+                  onPress={() =>
+                    setCheckedAmountAddWallet(!checkedAmountAddWallet)
+                  }>
+                  <Checkbox
+                    value="first"
+                    status={checkedAmountAddWallet ? 'checked' : 'unchecked'}
+                    onPress={() =>
+                      setCheckedAmountAddWallet(!checkedAmountAddWallet)
+                    }
+                    color={'#FFBF00'}
+                  />
+                  <Text
+                    style={{
+                      color: 'black',
+                      fontFamily: FONTS.FontRobotoMedium,
+                      fontSize: 15,
+                    }}>
+                    Amount Add To Wallet
+                  </Text>
+                </TouchableOpacity>
+                <TextInput
+                  label="Cash Or Credit Reason"
+                  value={cashOrCreditReason}
+                  style={[styles.valueText, {marginTop: 4}]}
+                  activeOutlineColor={'black'}
+                  mode="outlined"
+                  outlineColor={'black'}
+                  onChangeText={text => setCashOrCreditReason(text)}
+                  keyboardType="default"
                 />
               </View>
             </ScrollView>
@@ -943,5 +1164,11 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.FontRobotoMedium,
     fontSize: 14,
     marginBottom: 5,
+  },
+  separator: {
+    height: 1,
+    width: Display.setWidth(100),
+    borderColor: 'gray',
+    borderWidth: 1,
   },
 });

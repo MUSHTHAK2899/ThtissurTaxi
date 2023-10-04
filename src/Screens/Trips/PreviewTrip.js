@@ -473,6 +473,26 @@ const PreviewTrip = ({navigation, route}) => {
                 ₹ {Data?.customer_amount}
               </Text>
             </View>
+            <View style={styles.TextHead}>
+              <Text style={styles.CommonText}>Cash Or Credit :</Text>
+              <Text
+                style={[
+                  styles.CommonText,
+                  {fontSize: 16, fontFamily: FONTS.FontRobotoMedium},
+                ]}>
+                {Data?.cash_or_credit}
+              </Text>
+            </View>
+            <View style={styles.TextHead}>
+              <Text style={styles.CommonText}>Cash Or Credit Reason :</Text>
+              <Text
+                style={[
+                  styles.CommonText,
+                  {fontSize: 16, fontFamily: FONTS.FontRobotoMedium},
+                ]}>
+                {Data?.cash_or_credit_reason}
+              </Text>
+            </View>
           </View>
         </View>
         {/* <Text style={styles.CommonText}>

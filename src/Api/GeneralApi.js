@@ -3,38 +3,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class GeneralApiFetch {
   Login(payload) {
-    const reponse = axios.post(
-      `${constants.baseURL}user/login`,
-      payload,
-    );
+    const reponse = axios.post(`${constants.baseURL}user/login`, payload);
     return reponse;
   }
   VerifyOtp(payload) {
-    const reponse = axios.post(
-      `${constants.baseURL}user/verify-otp`,
-      payload,
-    );
+    const reponse = axios.post(`${constants.baseURL}user/verify-otp`, payload);
     return reponse;
   }
   ResendOtp(payload) {
-    const reponse = axios.post(
-      `${constants.baseURL}user/resend-otp`,
-      payload,
-    );
+    const reponse = axios.post(`${constants.baseURL}user/resend-otp`, payload);
     return reponse;
   }
   Logout(payload) {
-    const reponse = axios.post(
-      `${constants.baseURL}user/logout`,
-      payload,
-    );
+    const reponse = axios.post(`${constants.baseURL}user/logout`, payload);
     return reponse;
   }
   Register(payload) {
-    const reponse = axios.post(
-      `${constants.baseURL}user/register`,
-      payload,
-    );
+    const reponse = axios.post(`${constants.baseURL}user/register`, payload);
     return reponse;
   }
   ForgotPassword(payload) {
@@ -58,7 +43,7 @@ class GeneralApiFetch {
     );
     return reponse;
   }
- async UpdateProfilePic(payload) {
+  async UpdateProfilePic(payload) {
     var accessToken = await AsyncStorage.getItem('userAccessToken');
     console.log('tokenssssss=======>', accessToken);
     const reponse = multiPartAxios.post(
@@ -95,57 +80,62 @@ class GeneralApiFetch {
   }
 
   StartTrip(payload) {
-    const reponse = axios.post(
-      `${constants.baseURL}user/start-trip`,
-      payload,
-    );
+    const reponse = axios.post(`${constants.baseURL}user/start-trip`, payload);
     return reponse;
   }
   CancelTrip(payload) {
-    const reponse = axios.post(
-      `${constants.baseURL}user/cancel-trip`,
-      payload,
-    );
+    const reponse = axios.post(`${constants.baseURL}user/cancel-trip`, payload);
     return reponse;
   }
   UpdateTrip(payload) {
-    const reponse = axios.post(
-      `${constants.baseURL}user/update-trip`,
-      payload,
-    );
+    const reponse = axios.post(`${constants.baseURL}user/update-trip`, payload);
     return reponse;
   }
   EndTrip(payload) {
-    const reponse = axios.post(
-      `${constants.baseURL}user/end-trip`,
-      payload,
-    );
+    const reponse = axios.post(`${constants.baseURL}user/end-trip`, payload);
     return reponse;
   }
   AdminDeleteTrip(payload) {
-    const reponse = axios.post(
-      `${constants.baseURL}user/delete-trip`,
-      payload,
-    );
+    const reponse = axios.post(`${constants.baseURL}user/delete-trip`, payload);
     return reponse;
   }
   GetTrips(page) {
     const reponse = axios.get(
-      `${constants.baseURL}user/get-trips?page=${page} `,
+      `${constants.baseURL}user/get-trips?page=${page}`,
     );
     return reponse;
   }
+  GetTripsFilter(
+    page,
+    FromDate,
+    ToDateDate,
+    valueCompanyList,
+    valueDriversList,
+    valueVehicleNumberList,
+    PlaceOrClient,
+    valueCashOrCreditList,
+  ) {
+    const reponse = axios.get(
+      `${constants.baseURL}user/get-trips?page=${page}&from_date=${FromDate}&to_date=${ToDateDate}&company=${valueCompanyList}&driver=${valueDriversList}&vehicle=${valueVehicleNumberList}&keyword=${PlaceOrClient}&cash_or_credit=${valueCashOrCreditList} `,
+    );
+    return reponse;
+  }
+  GetTripFilterData() {
+    const reponse = axios.get(`${constants.baseURL}user/get-trip-filter-data`);
+    return reponse;
+  }
+
   ApproveTrip(payload) {
     const reponse = axios.post(
       `${constants.baseURL}user/approve-trip `,
-      payload
+      payload,
     );
     return reponse;
   }
   GetHomeData(payload) {
     const reponse = axios.get(
       `${constants.baseURL}user/get-home-data`,
-      payload
+      payload,
     );
     return reponse;
   }
@@ -155,7 +145,7 @@ class GeneralApiFetch {
     );
     return reponse;
   }
-  GetMyWallet(page,id) {
+  GetMyWallet(page, id) {
     const reponse = axios.get(
       `${constants.baseURL}user/get-transactions?driver_id=${id}&page=${page}`,
     );
@@ -164,42 +154,38 @@ class GeneralApiFetch {
   DeleteDriver(payload) {
     const reponse = axios.post(
       `${constants.baseURL}user/delete-driver`,
-      payload
+      payload,
     );
     return reponse;
   }
 
   AddDriver(payload) {
-    const reponse = axios.post(
-      `${constants.baseURL}user/add-driver`,
-      payload
-    );
+    const reponse = axios.post(`${constants.baseURL}user/add-driver`, payload);
     return reponse;
   }
 
   AdminUpdateDriver(payload) {
     const reponse = axios.post(
       `${constants.baseURL}user/update-driver`,
-      payload
+      payload,
     );
     return reponse;
   }
-  
+
   AdminMakeTransaction(payload) {
     const reponse = axios.post(
       `${constants.baseURL}user/make-transaction`,
-      payload
+      payload,
     );
     return reponse;
   }
   UpdateCustomerSignature(payload) {
     const reponse = axios.post(
       `${constants.baseURL}user/update-customer-signature`,
-      payload
+      payload,
     );
     return reponse;
   }
-
 }
 
 export default new GeneralApiFetch();

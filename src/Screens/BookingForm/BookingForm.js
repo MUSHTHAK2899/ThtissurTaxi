@@ -10,13 +10,14 @@ import {
   KeyboardAvoidingView,
   Button,
   BackHandler,
+  FlatList,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import Display from '../../utils/Display';
 import {FONTS} from '../../Constants/Constants';
 import Hedder from '../../Componets/Hedder';
-import {TextInput, RadioButton} from 'react-native-paper';
+import {TextInput, RadioButton,Checkbox} from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import DropDown from '../../Componets/DropDwon';
 import {format} from 'date-fns';
@@ -35,6 +36,7 @@ const BookingForm = ({navigation}) => {
   const [tripId, setTripId] = useState();
   const [DriverName, setDriverName] = useState('');
   const [checked, setChecked] = useState('first');
+  const [checkedBoxCash_credit, setCheckedBoxCash_credit] = useState('first');
   const [VehicleNumber, setVehicleNumber] = useState('');
   const [ClientName, setClientName] = useState('');
   const [CompanyName, setCompanyName] = useState('');
@@ -54,6 +56,7 @@ const BookingForm = ({navigation}) => {
   const [otherExpenseAmount, setOtherExpenseAmount] = useState('');
   const [customerAmount, setCustomerAmount] = useState('');
   const [signatureStatus, setSignatureStatus] = useState();
+  const [cashOrCreditReason, setCashOrCreditReason] = useState('');
 
   // start garage time
   const [startGrageDate, setstartGrageDate] = useState(new Date());
@@ -82,6 +85,17 @@ const BookingForm = ({navigation}) => {
 
   //bottomTabPress
   const [ButtonShowSatus, setButtonShowStatus] = useState();
+  //Suggessions
+  const [showProduct, setShowproduct] = useState(false);
+  const [showcompany, setShowcompany] = useState(false);
+  const [vehiclesNumberSuggessions, setVehiclesNumberSuggessions] = useState(
+    [],
+  );
+  const [vehiclesNumberSuggessionsList, setVehiclesNumberSuggessionsList] =
+    useState([]);
+  const [companySuggessions, setCompanySuggessions] = useState([]);
+  const [companySuggessionsList, setCompanySuggessionsList] = useState([]);
+  const [checkedAmountAddWallet, setCheckedAmountAddWallet] = useState(false);
 
   const handleDateChange = (event, date) => {
     if (event.type == 'set') {
@@ -171,7 +185,7 @@ const BookingForm = ({navigation}) => {
   useEffect(() => {
     setDriverName(TripData?.driver_name);
     setTripId(TripData?.trip_id);
-    setSignatureStatus(TripData?.customer_signature_status)
+    setSignatureStatus(TripData?.customer_signature_status);
     setChecked('first');
   }, [TripData]);
 
@@ -218,6 +232,14 @@ const BookingForm = ({navigation}) => {
     other_expense_name: otherExpenseName,
     other_expense_amount: +otherExpenseAmount,
     customer_amount: customerAmount,
+    cash_or_credit:
+      checkedBoxCash_credit == 'first'
+        ? 'Cash'
+        : checkedBoxCash_credit == 'second'
+        ? 'Credit'
+        : '',
+    cash_or_credit_reason: cashOrCreditReason,
+    amount_add_to_wallet:checkedAmountAddWallet?1:0
   };
 
   const HandleEndTrip = async () => {
@@ -388,7 +410,9 @@ const BookingForm = ({navigation}) => {
       .then(res => {
         setLoading(false);
         setButtonShowStatus(res.data?.data?.show_start_trip_button);
-        // console.log('res GetDriveDetails', res.data?.data);
+        setVehiclesNumberSuggessions(res?.data?.data?.vehicles);
+        setCompanySuggessions(res?.data?.data?.companies);
+        console.log('res GetDriveDetails', res.data?.data);
         AsyncStorage.setItem(
           'TripDetails',
           JSON.stringify(res.data?.data?.trip_data),
@@ -474,7 +498,7 @@ const BookingForm = ({navigation}) => {
       });
     });
     if (res.data && res.data.status == 200) {
-      setSignatureStatus(1)
+      setSignatureStatus(1);
       setLoading(false);
       console.log('UpdateCustomerSignature res', res);
       // navigation.navigate('Home');
@@ -487,6 +511,73 @@ const BookingForm = ({navigation}) => {
       toast.show(`${res.data?.message}`, {
         type: 'warning',
       });
+    }
+  };
+
+  //SuggessionsList
+
+  const itemSeparator = () => {
+    return <Text style={styles.separator}></Text>;
+  };
+
+  const renderItem = ({item}) => {
+    return (
+      <>
+        <TouchableOpacity
+          style={{marginHorizontal: 10, marginVertical: 10}}
+          onPress={() => clickedProduct(item)}>
+          <Text style={{color: 'black'}}>{item}</Text>
+        </TouchableOpacity>
+      </>
+    );
+  };
+  const renderItemCompany = ({item}) => {
+    return (
+      <>
+        <TouchableOpacity
+          style={{marginHorizontal: 10, marginVertical: 10}}
+          onPress={() => clickedCompany(item)}>
+          <Text style={{color: 'black'}}>{item}</Text>
+        </TouchableOpacity>
+      </>
+    );
+  };
+
+  const clickedProduct = item => {
+    setVehicleNumber(item);
+    setShowproduct(false);
+  };
+
+  const clickedCompany = item => {
+    setCompanyName(item);
+    setShowcompany(false);
+  };
+
+  const onChangeVehicleNumber = text => {
+    console.log(text);
+    setVehicleNumber(text);
+    const regex = new RegExp(text, 'i');
+    const result = vehiclesNumberSuggessions.filter(item => regex.test(item));
+    console.log(result);
+    if (result) {
+      setVehiclesNumberSuggessionsList(result);
+      setShowproduct(true);
+    } else {
+      setVehiclesNumberSuggessionsList(null);
+    }
+  };
+
+  const onChangeCompanyName = text => {
+    console.log(text);
+    setCompanyName(text);
+    const regex = new RegExp(text, 'i');
+    const result = companySuggessions.filter(item => regex.test(item));
+    console.log(result);
+    if (result) {
+      setCompanySuggessionsList(result);
+      setShowcompany(true);
+    } else {
+      setCompanySuggessionsList(null);
     }
   };
 
@@ -565,11 +656,30 @@ const BookingForm = ({navigation}) => {
                     activeOutlineColor={'black'}
                     mode="outlined"
                     outlineColor={'black'}
-                    onChangeText={text => setVehicleNumber(text)}
+                    onChangeText={text => onChangeVehicleNumber(text)}
                     keyboardType="ascii-capable"
                     maxLength={10}
                     autoCapitalize="characters"
+                    right={<TextInput.Icon icon="chevron-down" />}
                   />
+                  {showProduct &&
+                    VehicleNumber.length >= 1 &&
+                    vehiclesNumberSuggessionsList.length >= 1 && (
+                      <View
+                        style={{
+                          borderWidth: 1,
+                          borderColor: 'gray',
+                          marginTop: 5,
+                          borderRadius: 5,
+                        }}>
+                        <FlatList
+                          data={vehiclesNumberSuggessionsList}
+                          renderItem={renderItem}
+                          keyExtractor={(item, index) => index}
+                          ItemSeparatorComponent={itemSeparator}
+                        />
+                      </View>
+                    )}
                   <TextInput
                     label="Client Name"
                     value={ClientName}
@@ -587,9 +697,28 @@ const BookingForm = ({navigation}) => {
                     activeOutlineColor={'black'}
                     mode="outlined"
                     outlineColor={'black'}
-                    onChangeText={text => setCompanyName(text)}
+                    onChangeText={text => onChangeCompanyName(text)}
                     keyboardType="ascii-capable"
+                    right={<TextInput.Icon icon="chevron-down" />}
                   />
+                  {showcompany &&
+                    CompanyName.length >= 1 &&
+                    companySuggessionsList.length >= 1 && (
+                      <View
+                        style={{
+                          borderWidth: 1,
+                          borderColor: 'gray',
+                          marginTop: 5,
+                          borderRadius: 5,
+                        }}>
+                        <FlatList
+                          data={companySuggessionsList}
+                          renderItem={renderItemCompany}
+                          keyExtractor={(item, index) => index}
+                          ItemSeparatorComponent={itemSeparator}
+                        />
+                      </View>
+                    )}
                   <View style={{flexDirection: 'row'}}>
                     <TextInput
                       label="Enter Pick Up"
@@ -905,6 +1034,81 @@ const BookingForm = ({navigation}) => {
                     onChangeText={text => setCustomerAmount(text)}
                     keyboardType="number-pad"
                   />
+                  <View style={{flexDirection: 'row', marginTop: 5}}>
+                    {/* <Text style={styles.hedderText}>Vehicle Type</Text> */}
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <RadioButton
+                        value="first"
+                        status={
+                          checkedBoxCash_credit === 'first'
+                            ? 'checked'
+                            : 'unchecked'
+                        }
+                        onPress={() => setCheckedBoxCash_credit('first')}
+                        color={'#FFBF00'}
+                      />
+                      <Text
+                        style={{
+                          color: 'black',
+                          fontFamily: FONTS.FontRobotoMedium,
+                          fontSize: 15,
+                        }}>
+                        Cash
+                      </Text>
+                    </View>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <RadioButton
+                        value="second"
+                        status={
+                          checkedBoxCash_credit === 'second'
+                            ? 'checked'
+                            : 'unchecked'
+                        }
+                        onPress={() => setCheckedBoxCash_credit('second')}
+                        color={'#FFBF00'}
+                      />
+                      <Text
+                        style={{
+                          color: 'black',
+                          fontFamily: FONTS.FontRobotoMedium,
+                          fontSize: 15,
+                        }}>
+                        Credit
+                      </Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity
+                    style={{flexDirection: 'row', alignItems: 'center'}}
+                    onPress={() =>
+                      setCheckedAmountAddWallet(!checkedAmountAddWallet)
+                    }>
+                    <Checkbox
+                      value="first"
+                      status={checkedAmountAddWallet ? 'checked' : 'unchecked'}
+                      onPress={() =>
+                        setCheckedAmountAddWallet(!checkedAmountAddWallet)
+                      }
+                      color={'#FFBF00'}
+                    />
+                    <Text
+                      style={{
+                        color: 'black',
+                        fontFamily: FONTS.FontRobotoMedium,
+                        fontSize: 15,
+                      }}>
+                      Amount Add To Wallet
+                    </Text>
+                  </TouchableOpacity>
+                  <TextInput
+                    label="Cash Or Credit Reason"
+                    value={cashOrCreditReason}
+                    style={[styles.valueText, {marginTop: 4}]}
+                    activeOutlineColor={'black'}
+                    mode="outlined"
+                    outlineColor={'black'}
+                    onChangeText={text => setCashOrCreditReason(text)}
+                    keyboardType="default"
+                  />
                   <View
                     style={{
                       flexDirection: 'row',
@@ -929,11 +1133,19 @@ const BookingForm = ({navigation}) => {
                         Customer Signature Pad{' '}
                       </Text>
                     </TouchableOpacity>
-                    {
-                      signatureStatus==1?
-                    <AntDesign name={'checkcircle'} color={'green'} size={25} />: 
-                    <Entypo name={'circle-with-cross'} color={'#ef4444'} size={25} />
-                    }
+                    {signatureStatus == 1 ? (
+                      <AntDesign
+                        name={'checkcircle'}
+                        color={'green'}
+                        size={25}
+                      />
+                    ) : (
+                      <Entypo
+                        name={'circle-with-cross'}
+                        color={'#ef4444'}
+                        size={25}
+                      />
+                    )}
                   </View>
                 </View>
                 {signaturePadShow && (
@@ -1085,5 +1297,11 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     paddingHorizontal: 35,
     borderRadius: 20,
+  },
+  separator: {
+    height: 1,
+    width: Display.setWidth(100),
+    borderColor: 'gray',
+    borderWidth: 1,
   },
 });
