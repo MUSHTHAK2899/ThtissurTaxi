@@ -80,8 +80,8 @@ android {
         applicationId "com.quarous.taxi"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "2.2"
+        versionCode 4
+        versionName "2.6"
     }
     signingConfigs {
         debug {

@@ -96,6 +96,7 @@ const BookingForm = ({navigation}) => {
   const [companySuggessions, setCompanySuggessions] = useState([]);
   const [companySuggessionsList, setCompanySuggessionsList] = useState([]);
   const [checkedAmountAddWallet, setCheckedAmountAddWallet] = useState(false);
+  const [TrnNumber,setTrnNumber] = useState();
 
   const handleDateChange = (event, date) => {
     if (event.type == 'set') {
@@ -239,7 +240,8 @@ const BookingForm = ({navigation}) => {
         ? 'Credit'
         : '',
     cash_or_credit_reason: cashOrCreditReason,
-    amount_add_to_wallet:checkedAmountAddWallet?1:0
+    amount_add_to_wallet:checkedAmountAddWallet?1:0,
+    trn_number:TrnNumber
   };
 
   const HandleEndTrip = async () => {
@@ -639,6 +641,16 @@ const BookingForm = ({navigation}) => {
                       </Text>
                     </View>
                   </View>
+                  <TextInput
+                    label="Trn Number"
+                    value={TrnNumber}
+                    style={styles.valueText}
+                    activeOutlineColor={'black'}
+                    mode="outlined"
+                    outlineColor={'black'}
+                    onChangeText={text => setTrnNumber(text)}
+                    keyboardType="ascii-capable"
+                  />
                   <TextInput
                     label="Driver Name"
                     value={DriverName}

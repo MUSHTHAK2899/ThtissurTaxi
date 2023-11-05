@@ -66,6 +66,7 @@ const Trip = ({navigation}) => {
   const [openCashOrCreditList, setOpenCashOrCreditList] = useState(false);
   const [valueCashOrCreditList, setValueCashOrCreditList] = useState(null);
   const [PlaceOrClient, setPlaceorClient] = useState('');
+  const [filterApplay, setFilterApplay] = useState(false);
 
   const handleShareText = async text => {
     try {
@@ -150,6 +151,7 @@ const Trip = ({navigation}) => {
       setVehiclesNumberSuggessions(res?.data?.data?.vehicles);
       setCompanySuggessions(res?.data?.data?.companies);
       setTotalPages(res?.data?.data?.meta?.total_pages);
+      setFilterApplay(false);
     } else {
       console.log('GetTrips res 2', res);
       setIsLoading(false);
@@ -175,17 +177,25 @@ const Trip = ({navigation}) => {
   const onEndReachedEnd = () => {
     if (!isLoading) {
       if (currentPage == totalPages) {
-        // console.log('pages is equal reached');
+        console.log('pages is equal reached');
       } else {
         setCurrentPage(prevPage => prevPage + 1);
+        console.log('pages', filterApplay);
       }
     }
   };
 
   useEffect(() => {
     if (currentPage == 1) {
+      // setFilterApplay(false)
     } else {
-      GetTrips();
+      if (filterApplay) {
+        console.log('filterApplay', filterApplay);
+        setFilterApplay(true);
+        HandleFilterModalScroll();
+      } else {
+        GetTrips();
+      }
     }
   }, [currentPage]);
 
@@ -195,6 +205,7 @@ const Trip = ({navigation}) => {
       const acyncType = JSON.parse(accessuser);
       setUserLoginData(acyncType);
       GetTripsFirst();
+      setFilterApplay(false);
       setCurrentPage(1);
       // scrollViewRef.current.scrollToOffset({ offset: 0, animated: true });
     });
@@ -356,14 +367,63 @@ const Trip = ({navigation}) => {
       setVehiclesNumberSuggessions(res?.data?.data?.vehicles);
       setCompanySuggessions(res?.data?.data?.companies);
       setTotalPages(res?.data?.data?.meta?.total_pages);
+      console.log('total page res', res?.data?.data?.meta?.total_pages);
       setFiltterModalOpen(false);
-      setValueCompanyList(null)
-      setValueVehicleNumberList(null)
-      setValueDriversList(null)
-      setValueCashOrCreditList(null)
-      setPlaceorClient('')
+      setCurrentPage(1);
+      setFilterApplay(true);
+      // setValueCompanyList(null)
+      // setValueVehicleNumberList(null)
+      // setValueDriversList(null)
+      // setValueCashOrCreditList(null)
+      // setPlaceorClient('')
     } else {
       console.log('HandleFilterModal res 2', res?.data?.errors[0]);
+      setIsLoading2(false);
+      setFiltterModalOpen(false);
+      toast.show(`${res?.data?.errors[0]}`, {
+        type: 'danger',
+      });
+    }
+  };
+  const HandleFilterModalScroll = async () => {
+    toast.hideAll();
+    // setIsLoading2(true);
+    setIsLoading(true);
+    const res = await Api.GetTripsFilter(
+      currentPage,
+      FromDate,
+      ToDateDate,
+      valueCompanyList,
+      valueDriversList,
+      valueVehicleNumberList,
+      PlaceOrClient,
+      valueCashOrCreditList,
+    ).catch(err => {
+      // setIsLoading2(false);
+      setIsLoading(false);
+      toast.show(`${err?.message}`, {
+        type: 'danger',
+      });
+      console.log(err);
+    });
+    if (res.data && res.data.status == 200) {
+      // setIsLoading2(false);
+      setIsLoading(false);
+      console.log('HandleFilterModal res222', res);
+      setUserTripData(prevData => [...prevData, ...res?.data?.data?.trips]);
+      setVehiclesNumberSuggessions(res?.data?.data?.vehicles);
+      setCompanySuggessions(res?.data?.data?.companies);
+      setTotalPages(res?.data?.data?.meta?.total_pages);
+      console.log('total page res', res?.data?.data?.meta?.total_pages);
+      setFiltterModalOpen(false);
+      setFilterApplay(true);
+      // setValueCompanyList(null)
+      // setValueVehicleNumberList(null)
+      // setValueDriversList(null)
+      // setValueCashOrCreditList(null)
+      // setPlaceorClient('')
+    } else {
+      console.log('HandleFilterModal res 2211', res?.data?.errors[0]);
       setIsLoading2(false);
       setFiltterModalOpen(false);
       toast.show(`${res?.data?.errors[0]}`, {
@@ -399,6 +459,17 @@ const Trip = ({navigation}) => {
                 {item?.trip_status}
               </Text>
             </View>
+            {item?.trn_number && (
+              <Text
+                style={{
+                  color: 'black',
+                  fontSize: 15,
+                  fontFamily: FONTS.FontRobotoMedium,
+                  marginVertical: 1,
+                }}>
+                Trn Number : {item?.trn_number}
+              </Text>
+            )}
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
               <Text
                 style={{
@@ -435,6 +506,42 @@ const Trip = ({navigation}) => {
               }}>
               {item?.pick_up_drop_text}
             </Text>
+              <Text
+                style={{
+                  color: 'black',
+                  fontSize: 16,
+                  fontFamily: FONTS.FontRobotoRegular,
+                }}>
+                Total KM : {item?.total_km} KM
+              </Text>    
+            {item?.garage_total_time && (
+              <Text
+                style={{
+                  color: 'black',
+                  fontSize: 16,
+                  fontFamily: FONTS.FontRobotoRegular,
+                }}>
+                Garage Total Time : {item?.garage_total_time}
+              </Text>
+            )}
+            {String(item?.permit_toll)  && (
+              <Text
+                style={{
+                  color: 'black',
+                  fontSize: 16,
+                  fontFamily: FONTS.FontRobotoRegular,
+                }}>
+                Permit Toll : ₹ {item?.permit_toll}
+              </Text>
+            )}
+              <Text
+                style={{
+                  color: 'black',
+                  fontSize: 16,
+                  fontFamily: FONTS.FontRobotoRegular,
+                }}>
+                Customer Amount : ₹ {item?.customer_amount}
+              </Text>
             {item?.driver_bata > 0 && (
               <Text
                 style={{
