@@ -16,6 +16,10 @@ import EditForm from '../Screens/Trips/EditForm';
 import Wallet from '../Screens/Wallet/Index';
 import {useNetInfo} from '@react-native-community/netinfo';
 import NoInternet from '../utils/Nointernet';
+import Company from '../Screens/Company/Index';
+import AddCompany from '../Screens/Company/AddCompany';
+import EditCompany from '../Screens/Company/EditCompany';
+import ViewCompany from '../Screens/Company/ViewCompany';
 
 const Stack = createStackNavigator();
 const StackNavigation = () => {
@@ -37,6 +41,10 @@ const StackNavigation = () => {
     <Stack.Screen name="PreviewTrip" component={PreviewTrip} />
     <Stack.Screen name="EditForm" component={EditForm} />
     <Stack.Screen name="Wallet" component={Wallet} />
+    <Stack.Screen name="Company" component={Company} />
+    <Stack.Screen name="AddCompany" component={AddCompany} />
+    <Stack.Screen name="EditCompany" component={EditCompany} />
+    <Stack.Screen name="ViewCompany" component={ViewCompany} />
    
   </Stack.Navigator>
     </NavigationContainer>

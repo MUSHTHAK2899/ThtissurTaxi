@@ -207,13 +207,13 @@ const Home = ({navigation}) => {
                 <View style={{marginTop: 10, flexDirection: 'row', gap: 17}}>
                   <TouchableOpacity
                     style={[styles.buttonView, {width: Display.setWidth(42)}]}
-                    onPress={() => navigation.navigate('Account')}>
+                    onPress={() => navigation.navigate('Company')}>
                     <MaterialCommunityIcons
                       name={'account'}
                       color={'black'}
                       size={30}
                     />
-                    <Text style={styles.buttonText}>My Account</Text>
+                    <Text style={styles.buttonText}>Company</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.buttonView, {width: Display.setWidth(42)}]}

@@ -43,11 +43,12 @@ const Login = ({navigation}) => {
         password: password,
       }).catch(err => {
         setLoading(false);
-        // console.log(err);
+        console.log(err);
         toast.show( `${err?.message}`,{
           type:'danger',
         });
       });
+      console.log('login res', res);
       if (res.data && res.data.status == 200) {
         setLoading(false);
         // console.log('login res', res?.data);
@@ -92,7 +93,7 @@ const Login = ({navigation}) => {
         source={require('../../Assets/LoginPage.png')}
         style={{flex: 1}}
         resizeMode="stretch">
-        <MotiView
+        <View
           from={{opacity: 0, translateY: 500}}
           animate={{opacity: 0.8, translateY: BoxMove}}
           transition={{
@@ -208,7 +209,7 @@ const Login = ({navigation}) => {
               </Text>
             </TouchableOpacity>
           </View>
-        </MotiView>
+        </View>
       </ImageBackground>
       {loading && <LoadingMoadal />}
     </SafeAreaProvider>

@@ -12,18 +12,18 @@ import {
   BackHandler,
   FlatList,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
+import React, { useEffect, useRef, useState } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Display from '../../utils/Display';
-import {FONTS} from '../../Constants/Constants';
+import { FONTS } from '../../Constants/Constants';
 import Hedder from '../../Componets/Hedder';
-import {TextInput, RadioButton,Checkbox} from 'react-native-paper';
+import { TextInput, RadioButton, Checkbox } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import DropDown from '../../Componets/DropDwon';
-import {format} from 'date-fns';
+import { format } from 'date-fns';
 import Api from '../../Api/GeneralApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useToast} from 'react-native-toast-notifications';
+import { useToast } from 'react-native-toast-notifications';
 import LoadingMoadal from '../../Componets/LoadingMoadal';
 import Drive from '../Drive/Drive';
 import SignatureCapture from 'react-native-signature-capture';
@@ -31,7 +31,7 @@ import Modal from 'react-native-modal';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 
-const BookingForm = ({navigation}) => {
+const BookingForm = ({ navigation }) => {
   const toast = useToast();
   const [tripId, setTripId] = useState();
   const [DriverName, setDriverName] = useState('');
@@ -96,7 +96,23 @@ const BookingForm = ({navigation}) => {
   const [companySuggessions, setCompanySuggessions] = useState([]);
   const [companySuggessionsList, setCompanySuggessionsList] = useState([]);
   const [checkedAmountAddWallet, setCheckedAmountAddWallet] = useState(false);
-  const [TrnNumber,setTrnNumber] = useState();
+  const [TrnNumber, setTrnNumber] = useState();
+
+  //signature
+  const [SignaturePhone, setSignaturePhone] = useState();
+  const [DOBSign, setDOBSign] = useState(new Date());
+  const [showDOBSign, setShowDOBSign] = useState(false);
+  const handleShowDOBSign = (event, date) => {
+    if (event.type == 'set') {
+      setShowDOBSign(false);
+      if (date) {
+        setDOBSign(date);
+      }
+    } else {
+      setShowDOBSign(false);
+    }
+  };
+
 
   const handleDateChange = (event, date) => {
     if (event.type == 'set') {
@@ -237,11 +253,11 @@ const BookingForm = ({navigation}) => {
       checkedBoxCash_credit == 'first'
         ? 'Cash'
         : checkedBoxCash_credit == 'second'
-        ? 'Credit'
-        : '',
+          ? 'Credit'
+          : '',
     cash_or_credit_reason: cashOrCreditReason,
-    amount_add_to_wallet:checkedAmountAddWallet?1:0,
-    trn_number:TrnNumber
+    amount_add_to_wallet: checkedAmountAddWallet ? 1 : 0,
+    trn_number: TrnNumber
   };
 
   const HandleEndTrip = async () => {
@@ -522,24 +538,24 @@ const BookingForm = ({navigation}) => {
     return <Text style={styles.separator}></Text>;
   };
 
-  const renderItem = ({item}) => {
+  const renderItem = ({ item }) => {
     return (
       <>
         <TouchableOpacity
-          style={{marginHorizontal: 10, marginVertical: 10}}
+          style={{ marginHorizontal: 10, marginVertical: 10 }}
           onPress={() => clickedProduct(item)}>
-          <Text style={{color: 'black'}}>{item}</Text>
+          <Text style={{ color: 'black' }}>{item}</Text>
         </TouchableOpacity>
       </>
     );
   };
-  const renderItemCompany = ({item}) => {
+  const renderItemCompany = ({ item }) => {
     return (
       <>
         <TouchableOpacity
-          style={{marginHorizontal: 10, marginVertical: 10}}
+          style={{ marginHorizontal: 10, marginVertical: 10 }}
           onPress={() => clickedCompany(item)}>
-          <Text style={{color: 'black'}}>{item}</Text>
+          <Text style={{ color: 'black' }}>{item}</Text>
         </TouchableOpacity>
       </>
     );
@@ -586,7 +602,7 @@ const BookingForm = ({navigation}) => {
   return (
     <>
       {ButtonShowSatus == 0 ? (
-        <SafeAreaProvider style={{backgroundColor: '#fefce8'}}>
+        <SafeAreaProvider style={{ backgroundColor: '#fefce8' }}>
           <SafeAreaView style={styles.safeAreaContainer} />
           <StatusBar
             translucent
@@ -596,9 +612,9 @@ const BookingForm = ({navigation}) => {
           <Hedder name={'Booking Form'} navigation={navigation} />
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={{flex: 1, backgroundColor: '#fefce8'}}>
-            <View style={{flex: 1}}>
-              <ScrollView style={{flex: 1, backgroundColor: '#fefce8'}}>
+            style={{ flex: 1, backgroundColor: '#fefce8' }}>
+            <View style={{ flex: 1 }}>
+              <ScrollView style={{ flex: 1, backgroundColor: '#fefce8' }}>
                 <View
                   style={{
                     backgroundColor: '#fefce8',
@@ -606,9 +622,9 @@ const BookingForm = ({navigation}) => {
                     marginVertical: 20,
                     marginBottom: 50,
                   }}>
-                  <View style={{flexDirection: 'row'}}>
+                  <View style={{ flexDirection: 'row' }}>
                     <Text style={styles.hedderText}>Vehicle Type</Text>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <RadioButton
                         value="first"
                         status={checked === 'first' ? 'checked' : 'unchecked'}
@@ -624,7 +640,7 @@ const BookingForm = ({navigation}) => {
                         Ac
                       </Text>
                     </View>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <RadioButton
                         value="second"
                         status={checked === 'second' ? 'checked' : 'unchecked'}
@@ -731,7 +747,7 @@ const BookingForm = ({navigation}) => {
                         />
                       </View>
                     )}
-                  <View style={{flexDirection: 'row'}}>
+                  <View style={{ flexDirection: 'row' }}>
                     <TextInput
                       label="Enter Pick Up"
                       value={PickUp}
@@ -745,7 +761,7 @@ const BookingForm = ({navigation}) => {
                     <TextInput
                       label="Enter Drop"
                       value={Drop}
-                      style={[styles.valueText2, {marginLeft: 10}]}
+                      style={[styles.valueText2, { marginLeft: 10 }]}
                       activeOutlineColor={'black'}
                       mode="outlined"
                       outlineColor={'black'}
@@ -786,9 +802,9 @@ const BookingForm = ({navigation}) => {
                     value={
                       startGrageTime
                         ? startGrageTime.toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
                         : ''
                     }
                     label={'Starting time Garage'}
@@ -838,9 +854,9 @@ const BookingForm = ({navigation}) => {
                     value={
                       startTimePickupPoint
                         ? startTimePickupPoint.toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
                         : ''
                     }
                     label={'Starting time Pickup Point'}
@@ -899,9 +915,9 @@ const BookingForm = ({navigation}) => {
                     value={
                       endTimeDropPoint
                         ? endTimeDropPoint.toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
                         : ''
                     }
                     label={'End Time Drop Point'}
@@ -936,9 +952,9 @@ const BookingForm = ({navigation}) => {
                     value={
                       endGrageTime
                         ? endGrageTime.toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
                         : ''
                     }
                     label={'End time Garage'}
@@ -994,7 +1010,7 @@ const BookingForm = ({navigation}) => {
                     onChangeText={text => setPerimitTollParkingAmount(text)}
                     keyboardType="number-pad"
                   />
-                  <View style={{flexDirection: 'row'}}>
+                  <View style={{ flexDirection: 'row' }}>
                     <TextInput
                       label="Diesel Amount"
                       value={DieselAmount}
@@ -1008,7 +1024,7 @@ const BookingForm = ({navigation}) => {
                     <TextInput
                       label="Diesel Km"
                       value={DieselKm}
-                      style={[styles.valueText2, {marginLeft: 10}]}
+                      style={[styles.valueText2, { marginLeft: 10 }]}
                       activeOutlineColor={'black'}
                       mode="outlined"
                       outlineColor={'black'}
@@ -1046,9 +1062,9 @@ const BookingForm = ({navigation}) => {
                     onChangeText={text => setCustomerAmount(text)}
                     keyboardType="number-pad"
                   />
-                  <View style={{flexDirection: 'row', marginTop: 5}}>
+                  <View style={{ flexDirection: 'row', marginTop: 5 }}>
                     {/* <Text style={styles.hedderText}>Vehicle Type</Text> */}
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <RadioButton
                         value="first"
                         status={
@@ -1068,7 +1084,7 @@ const BookingForm = ({navigation}) => {
                         Cash
                       </Text>
                     </View>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <RadioButton
                         value="second"
                         status={
@@ -1090,7 +1106,7 @@ const BookingForm = ({navigation}) => {
                     </View>
                   </View>
                   <TouchableOpacity
-                    style={{flexDirection: 'row', alignItems: 'center'}}
+                    style={{ flexDirection: 'row', alignItems: 'center' }}
                     onPress={() =>
                       setCheckedAmountAddWallet(!checkedAmountAddWallet)
                     }>
@@ -1114,7 +1130,7 @@ const BookingForm = ({navigation}) => {
                   <TextInput
                     label="Cash Or Credit Reason"
                     value={cashOrCreditReason}
-                    style={[styles.valueText, {marginTop: 4}]}
+                    style={[styles.valueText, { marginTop: 4 }]}
                     activeOutlineColor={'black'}
                     mode="outlined"
                     outlineColor={'black'}
@@ -1165,7 +1181,7 @@ const BookingForm = ({navigation}) => {
                     isVisible={signaturePadShow}
                     onBackdropPress={() => SetSignaturePadShow(false)}
                     onBackButtonPress={() => SetSignaturePadShow(false)}
-                    style={{justifyContent: 'center'}}
+                    style={{ justifyContent: 'center' }}
                     animationType="fade">
                     <View style={styles.container}>
                       <SignatureCapture
@@ -1177,8 +1193,36 @@ const BookingForm = ({navigation}) => {
                         showTitleLabel={true}
                         viewMode={'portrait'}
                       />
+                      <TextInput
+                        label="Phone Number"
+                        value={SignaturePhone}
+                        style={styles.valueText}
+                        activeOutlineColor={'black'}
+                        mode="outlined"
+                        outlineColor={'black'}
+                        onChangeText={text => setSignaturePhone(text)}
+                        keyboardType="number-pad"
+                      />
+                      <View style={{ width: '100%' }}>
+                        <DropDown
+                          color={'#fefce8'}
+                          value={DOBSign ? format(DOBSign, 'dd/MM/yy') : ''}
+                          label={'Date Of Birth'}
+                          onPress={() => setShowDOBSign(true)}
+                          width={''}
+                        />
+                        {showDOBSign && (
+                          <DateTimePicker
+                            value={DOBSign || new Date()}
+                            mode="date"
+                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                            onChange={handleShowDOBSign}
+                          />
+                        )}
+                      </View>
+
                       <View
-                        style={{flexDirection: 'row', padding: 20, gap: 30}}>
+                        style={{ flexDirection: 'row', padding: 20, gap: 30 }}>
                         <TouchableOpacity style={styles.ButtonRoot}>
                           <Text
                             style={{
@@ -1223,13 +1267,13 @@ const BookingForm = ({navigation}) => {
                 <Text style={styles.buttonText}>Update Trip</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.buttonView, {backgroundColor: '#28a745'}]}
+                style={[styles.buttonView, { backgroundColor: '#28a745' }]}
                 onPress={HandleEndTrip}>
                 <Text style={styles.buttonText}>End Trip</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={HandleCancelTrip}
-                style={[styles.buttonView, {backgroundColor: 'red'}]}>
+                style={[styles.buttonView, { backgroundColor: 'red' }]}>
                 <Text style={styles.buttonText}>Cancel Trip</Text>
               </TouchableOpacity>
             </View>
