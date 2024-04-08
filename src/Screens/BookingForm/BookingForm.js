@@ -1193,7 +1193,7 @@ const BookingForm = ({ navigation }) => {
                         showTitleLabel={true}
                         viewMode={'portrait'}
                       />
-                      <TextInput
+                      {/* <TextInput
                         label="Phone Number"
                         value={SignaturePhone}
                         style={styles.valueText}
@@ -1219,7 +1219,7 @@ const BookingForm = ({ navigation }) => {
                             onChange={handleShowDOBSign}
                           />
                         )}
-                      </View>
+                      </View> */}
 
                       <View
                         style={{ flexDirection: 'row', padding: 20, gap: 30 }}>

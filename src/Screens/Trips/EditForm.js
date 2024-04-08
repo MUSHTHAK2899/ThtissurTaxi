@@ -9,7 +9,7 @@ import {
   ScrollView,
   FlatList,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import Display from '../../utils/Display';
 import {FONTS} from '../../Constants/Constants';
@@ -22,6 +22,10 @@ import Api from '../../Api/GeneralApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useToast} from 'react-native-toast-notifications';
 import LoadingMoadal from '../../Componets/LoadingMoadal';
+import SignatureCapture from 'react-native-signature-capture';
+import Modal from 'react-native-modal';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import Entypo from 'react-native-vector-icons/Entypo';
 
 const EditForm = ({navigation, route}) => {
   const toast = useToast();
@@ -479,6 +483,57 @@ const EditForm = ({navigation, route}) => {
       setCompanySuggessionsList(null);
     }
   };
+
+  const [signaturePadShow, SetSignaturePadShow] = useState(false);
+  const [signatureStatus, setSignatureStatus] = useState();
+  const signatureRef = useRef(null);
+
+  const handleSave = () => {
+    console.log('hai');
+    if (signatureRef.current) {
+      signatureRef.current.saveImage();
+    }
+  };
+
+  const handleReset = () => {
+    if (signatureRef.current) {
+      signatureRef.current.resetImage();
+    }
+  };
+
+  const handleSaveEvent = async result => {
+    // Handle the signature data from result.encoded
+    console.log('Signature saved:', result.encoded);
+    SetSignaturePadShow(false);
+    toast.hideAll();
+    setLoading(true);
+    const res = await Api.UpdateCustomerSignature({
+      trip_id: item?.trip_id,
+      signature: String(result.encoded),
+    }).catch(err => {
+      setLoading(false);
+      // console.log(err);
+      toast.show(`${err?.message}`, {
+        type: 'danger',
+      });
+    });
+    if (res.data && res.data.status == 200) {
+      setSignatureStatus(1);
+      setLoading(false);
+      console.log('UpdateCustomerSignature res', res);
+      // navigation.navigate('Home');
+      toast.show(`${res.data?.message}`, {
+        type: 'success',
+      });
+    } else {
+      setLoading(false);
+      console.log('UpdateCustomerSignature res 2', res);
+      toast.show(`${res.data?.message}`, {
+        type: 'warning',
+      });
+    }
+  };
+
 
   return (
     <>
@@ -1084,6 +1139,31 @@ const EditForm = ({navigation, route}) => {
                     Amount Add To Wallet
                   </Text>
                 </TouchableOpacity>
+                <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginTop: 20,
+                      gap: 7,
+                    }}>
+                    <TouchableOpacity
+                      style={{
+                        backgroundColor: '#155e75',
+                        width: 180,
+                        paddingVertical: 10,
+                        borderRadius: 20,
+                      }}
+                      onPress={() => SetSignaturePadShow(true)}>
+                      <Text
+                        style={{
+                          color: 'white',
+                          textAlign: 'center',
+                          fontFamily: FONTS.FontRobotoBold,
+                        }}>
+                        Customer Signature Pad{' '}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 <TextInput
                   label="Cash Or Credit Reason"
                   value={cashOrCreditReason}
@@ -1105,6 +1185,50 @@ const EditForm = ({navigation, route}) => {
         </KeyboardAvoidingView>
         {loading && <LoadingMoadal />}
       </SafeAreaProvider>
+      <Modal
+                    isVisible={signaturePadShow}
+                    onBackdropPress={() => SetSignaturePadShow(false)}
+                    onBackButtonPress={() => SetSignaturePadShow(false)}
+                    style={{ justifyContent: 'center' }}
+                    animationType="fade">
+                    <View style={styles.container}>
+                      <SignatureCapture
+                        style={styles.signature}
+                        ref={signatureRef}
+                        onSaveEvent={handleSaveEvent}
+                        saveImageFileInExtStorage={false}
+                        showNativeButtons={false}
+                        showTitleLabel={true}
+                        viewMode={'portrait'}
+                      />
+
+                      <View
+                        style={{ flexDirection: 'row', padding: 20, gap: 30 }}>
+                        <TouchableOpacity style={styles.ButtonRoot}>
+                          <Text
+                            style={{
+                              color: 'white',
+                              fontFamily: FONTS.FontRobotoBold,
+                              fontSize: 16,
+                            }}
+                            onPress={handleSave}>
+                            Update
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.ButtonRoot}>
+                          <Text
+                            style={{
+                              color: 'white',
+                              fontFamily: FONTS.FontRobotoBold,
+                              fontSize: 16,
+                            }}
+                            onPress={handleReset}>
+                            Reset
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </Modal>
     </>
   );
 };
@@ -1170,5 +1294,17 @@ const styles = StyleSheet.create({
     width: Display.setWidth(100),
     borderColor: 'gray',
     borderWidth: 1,
+  },
+  signature: {
+    height: Display.setHeight(45),
+    borderColor: 'white',
+    borderWidth: 1,
+    width: '100%',
+  },
+  ButtonRoot: {
+    backgroundColor: '#f59e0b',
+    paddingVertical: 11,
+    paddingHorizontal: 35,
+    borderRadius: 20,
   },
 });
